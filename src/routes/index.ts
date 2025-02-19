@@ -1,5 +1,5 @@
-import { userRoutes } from './user';
+import router from "./router";
+import "./product";
+import "./user";
 
-export const routes = {
-  '/users': userRoutes,
-};
+export default router;

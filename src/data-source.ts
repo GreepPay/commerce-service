@@ -1,16 +1,17 @@
-import { DataSource } from 'typeorm';
-import { User } from './models/User';
+import { DataSource } from "typeorm";
+// import { User } from "./models/User";
 
 export const AppDataSource = new DataSource({
-  type: 'postgres',
+  type: "postgres",
   host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || '5432'),
+  port: parseInt(process.env.DB_PORT || "5432"),
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   synchronize: true,
   logging: true,
-  entities: [User],
+  // entities: [User],
+  entities: ["src/models/**/*.ts"],
   subscribers: [],
-  migrations: [],
-}); 
+  migrations: ["src/database/migrations/*.ts"],
+});
