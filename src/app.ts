@@ -1,48 +1,46 @@
-import router from "./routes";
+import "./routes";
+import router from "./routes/router";
 import { AppDataSource } from "./data-source.ts";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { swaggerSpec } from "./config/swagger.ts";
 
-// Initialize database connection
-let isDatabaseReady = false;
-
 const swaggerUiPath = join(__dirname, "../node_modules/swagger-ui-dist");
 
 AppDataSource.initialize()
   .then(() => {
-    isDatabaseReady = true;
-
-    // Start server after database is ready
     Bun.serve({
       port: parseInt(process.env.PORT || "8000"),
       async fetch(req: Request) {
         const url = new URL(req.url);
 
-        // Check if database is ready
-        if (!isDatabaseReady) {
-          return new Response("Service Unavailable - Database initializing", {
-            status: 503,
-            headers: { "Content-Type": "text/plain" },
-          });
-        }
-
-        // Serve Swagger UI
         if (url.pathname === "/api-docs") {
           let swaggerHtml = readFileSync(
             join(swaggerUiPath, "index.html"),
             "utf-8"
           );
-          swaggerHtml = swaggerHtml.replace(
-            "https://petstore.swagger.io/v2/swagger.json",
-            "/swagger.json"
-          );
+
+          let initializerPath = join(swaggerUiPath, "swagger-initializer.js");
+
+          // Replace "https://petstore.swagger.io/v2/swagger.json" with "/swagger.json" in file
+          if (existsSync(initializerPath)) {
+            let initializerContent = readFileSync(initializerPath, "utf-8");
+            initializerContent = initializerContent.replace(
+              "https://petstore.swagger.io/v2/swagger.json",
+              "/swagger.json"
+            );
+
+            swaggerHtml = swaggerHtml.replace(
+              /<script src=".\/swagger-initializer\.js" charset="UTF-8"> <\/script>/,
+              `<script>${initializerContent}</script>`
+            );
+          }
+
           return new Response(swaggerHtml, {
             headers: { "Content-Type": "text/html" },
           });
         }
 
-        // Serve OpenAPI specification
         if (url.pathname === "/swagger.json") {
           return new Response(JSON.stringify(swaggerSpec), {
             headers: { "Content-Type": "application/json" },
@@ -58,7 +56,6 @@ AppDataSource.initialize()
         }
 
         // Handle API routes
-
         return router.match(req);
       },
     });
@@ -67,10 +64,7 @@ AppDataSource.initialize()
       `Server running on http://localhost:${process.env.PORT || 8000}`
     );
   })
-  .catch((error) => {
-    console.error("Failed to initialize database:", error);
-    process.exit(1);
-  });
+  .catch((error) => console.log(error));
 
 function getContentType(pathname: string): string {
   if (pathname.endsWith(".css")) return "text/css";
