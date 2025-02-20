@@ -1,45 +1,80 @@
+import { OrderStatus, PaymentStatus } from "../models/Order";
+
 export interface Order {
-  id: string;
+  id?: string;
   customerId: string;
-  saleId: string;
+  saleId?: string;
   items: OrderItem[];
   shippingAddress: Address;
   billingAddress: Address;
-  status: OrderStatus;
-  statusHistory: StatusUpdate[];
+  status?: OrderStatus;
+  statusHistory?: StatusUpdate[];
+  paymentMethod?: string;
+  paymentStatus?: PaymentStatus;
+  paymentDetails?: PaymentDetails;
+  refundDetails?: RefundDetails;
   cancellationReason?: string;
   refundId?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  subtotalAmount?: number;
+  taxAmount?: number;
+  discountAmount?: number;
+  totalAmount?: number;
+  currency?: string;
+  appliedDiscounts?: AppliedDiscount[];
+  taxDetails?: TaxDetail[];
 }
 
 export interface OrderItem {
   productId: string;
   sku: string;
   quantity: number;
-  fulfilledQuantity: number; // For partial fulfillments
-  priceSnapshot: number; // Price at time of purchase
+  fulfilledQuantity?: number;
+  price: number;
+  taxRate?: number;
+  taxAmount?: number;
+  discountAmount?: number;
+  total?: number;
 }
 
 export interface StatusUpdate {
   status: OrderStatus;
-  changedAt: Date;
-  changedBy: string; // System/user ID
-  notes?: string;
+  timestamp: Date;
+  changedBy?: string;
+  note?: string;
 }
 
-// Enums
-enum OrderStatus {
-  DRAFT = "draft",
-  CONFIRMED = "confirmed",
-  PROCESSING = "processing",
-  SHIPPED = "shipped",
-  DELIVERED = "delivered",
-  CANCELLED = "cancelled",
-  RETURNED = "returned",
+export interface PaymentDetails {
+  transactionId: string;
+  provider: string;
+  method: string;
+  amount: number;
+  currency: string;
+  status: string;
+  timestamp: Date;
 }
 
-// Address Structure
+export interface RefundDetails {
+  transactionId: string;
+  amount: number;
+  reason: string;
+  status: string;
+  timestamp: Date;
+}
+
+export interface AppliedDiscount {
+  code: string;
+  type: "percentage" | "fixed_amount";
+  value: number;
+  description: string;
+}
+
+export interface TaxDetail {
+  type: string;
+  rate: number;
+  amount: number;
+  description: string;
+}
+
 export interface Address {
   street: string;
   city: string;

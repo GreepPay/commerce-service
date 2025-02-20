@@ -25,6 +25,7 @@ export interface ICreateProduct {
   description: string;
   type: ProductType;
   price: number;
+  status: ProductStatus;
   currency: string; // ISO 4217
   categoryIds: string[];
   tags: string[];

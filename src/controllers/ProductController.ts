@@ -1,111 +1,107 @@
-import type { ICreateProduct } from "../forms/products";
 import { ProductService } from "../services/ProductService";
-import { User } from "../models/User";
 import HttpResponse from "../common/HttpResponse";
 import type { BunRequest } from "../routes/router";
+import { Product } from "../models/Product";
+import type { ICreateProduct } from "../forms/products";
 
 export class ProductController {
-  // Get authenticated user
-  async getAllProducts(request: BunRequest) {
-    let response = await new ProductService(request).allProducts();
+  private productService: ProductService;
 
-    if (response) {
-      return HttpResponse.success("Products fetched successfully", response);
-    }
-    return response;
+  constructor() {
+    this.productService = new ProductService();
   }
 
-  // Create a new product
-  //   async createAuthUser(request: BunRequest) {
-  //     let data: ICreateProduct = (await request.json()) as ICreateProduct;
-  //     let response = await new ProductService(request).saveUser(data);
+  async getAllProducts(request: BunRequest) {
+    const result = await this.productService.getAllProducts();
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
+  }
 
-  //     if (response instanceof User) {
-  //       return HttpResponse.success("User created successfully", response);
-  //     }
+  async getProductById(request: BunRequest) {
+    const id = request.params.id;
+    const result = await this.productService.getProductById(id);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
+  }
 
-  //     return response;
-  //   }
+  async createProduct(request: BunRequest) {
+    const productData = (await request.json()) as ICreateProduct;
+    const result = await this.productService.createProduct(productData);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
+  }
 
-  //   // Authenticate user
-  //   async login(request: BunRequest) {
-  //     let data: AuthenticateUserForm =
-  //       (await request.json()) as AuthenticateUserForm;
-  //     let response = await new AuthenticationService(request).authenticateUser(
-  //       data
-  //     );
+  async updateProduct(request: BunRequest) {
+    const id = request.params.id;
+    const productData = (await request.json()) as Partial<ICreateProduct>;
+    const result = await this.productService.updateProduct(id, productData);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
+  }
 
-  //     if ("token" in response) {
-  //       return HttpResponse.success("User authenticated successfully", response);
-  //     }
+  async deleteProduct(request: BunRequest) {
+    const id = request.params.id;
+    const result = await this.productService.deleteProduct(id);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
+  }
 
-  //     return response;
-  //   }
+  async adjustInventory(request: BunRequest): Promise<Response> {
+    try {
+      const { id } = request.params;
+      const { count } = (await request.json()) as { count: number };
+      const result = await this.productService.adjustInventory(id, count);
+      return new Response(JSON.stringify(result), {
+        status: result.statusCode,
+      });
+    } catch (error) {
+      return new Response(
+        JSON.stringify(HttpResponse.failure("Failed to adjust inventory", 400)),
+        { status: 400 }
+      );
+    }
+  }
 
-  //   // Reset user OTP
-  //   async resetUserOtp(request: BunRequest) {
-  //     let data: ResetPasswordForm = (await request.json()) as ResetPasswordForm;
-  //     let response = await new AuthenticationService(request).resetUserOtp(
-  //       data.email
-  //     );
+  async checkAvailability(request: BunRequest): Promise<Response> {
+    try {
+      const { id } = request.params;
+      const result = await this.productService.checkAvailability(id);
+      return new Response(JSON.stringify(result), {
+        status: result.statusCode,
+      });
+    } catch (error) {
+      return new Response(
+        JSON.stringify(
+          HttpResponse.failure("Failed to check availability", 400)
+        ),
+        { status: 400 }
+      );
+    }
+  }
 
-  //     if (response instanceof User) {
-  //       return HttpResponse.success("User OTP reset successfully", response);
-  //     }
-
-  //     return response;
-  //   }
-
-  //   // Verify user OTP
-  //   async verifyUserOtp(request: BunRequest) {
-  //     let data: ValidateOtpForm = (await request.json()) as ValidateOtpForm;
-  //     let response = await new AuthenticationService(request).verifyUserOtp(data);
-
-  //     if (response instanceof User) {
-  //       return HttpResponse.success("User OTP verified successfully", response);
-  //     }
-
-  //     return response;
-  //   }
-
-  //   // Update user password
-  //   async updateUserPassword(request: BunRequest) {
-  //     let data: ResetPasswordForm = (await request.json()) as ResetPasswordForm;
-  //     let response = await new AuthenticationService(request).updateUserPassword(
-  //       data
-  //     );
-
-  //     return response;
-  //   }
-
-  // Update user profile
-  //   async updateUserProfile(request: BunRequest) {
-  //     let data: UpdateUserProfileForm =
-  //       (await request.json()) as UpdateUserProfileForm;
-  //     let response = await new AuthenticationService(request).updateUserProfile(
-  //       data
-  //     );
-
-  //     if (response instanceof User) {
-  //       return HttpResponse.success(
-  //         "User profile updated successfully",
-  //         response
-  //       );
-  //     }
-
-  //     return response;
-  //   }
-
-  //   // Logout user
-  //   async logout(request: BunRequest) {
-  //     let response = await new AuthenticationService(request).logoutUser();
-  //     return response;
-  //   }
-
-  //   // Delete user
-  //   async deleteUser(request: BunRequest) {
-  //     let userId = request.params.id;
-  //     let response = await new AuthenticationService(request).deleteUser(userId);
-  //     return response;
-  //   }
+  async getProductTypes(request: BunRequest): Promise<Response> {
+    try {
+      const result = await this.productService.getProductTypes();
+      return new Response(JSON.stringify(result), {
+        status: result.statusCode,
+      });
+    } catch (error) {
+      return new Response(
+        JSON.stringify(
+          HttpResponse.failure("Failed to retrieve product types", 400)
+        ),
+        { status: 400 }
+      );
+    }
+  }
 }

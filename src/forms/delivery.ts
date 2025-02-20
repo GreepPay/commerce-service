@@ -1,3 +1,25 @@
+// Enums
+export enum DeliveryStatus {
+  // Initial states
+  PENDING = "pending",
+  PROCESSING = "processing",
+  LABEL_CREATED = "label_created",
+
+  // Shipping states
+  SHIPPED = "shipped",
+  IN_TRANSIT = "in_transit",
+  OUT_FOR_DELIVERY = "out_for_delivery",
+
+  // Final states
+  DELIVERED = "delivered",
+
+  // Exception states
+  FAILED = "failed",
+  FAILED_ATTEMPT = "failed_attempt",
+  RETURNED = "returned",
+  RETURN_TO_SENDER = "return_to_sender",
+}
+
 export interface Delivery {
   id: string;
   orderId: string;
@@ -23,14 +45,4 @@ export interface TrackingEvent {
   status: DeliveryStatus;
   description: string;
   carrierCode?: string; // Original carrier status code
-}
-
-// Enums
-export enum DeliveryStatus {
-  LABEL_CREATED = "label_created",
-  IN_TRANSIT = "in_transit",
-  OUT_FOR_DELIVERY = "out_for_delivery",
-  DELIVERED = "delivered",
-  FAILED_ATTEMPT = "failed_attempt",
-  RETURN_TO_SENDER = "return_to_sender",
 }

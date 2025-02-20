@@ -1,5 +1,10 @@
 import { DataSource } from "typeorm";
-// import { User } from "./models/User";
+import { Product } from "./models/Product";
+import { Order } from "./models/Order";
+import { Delivery } from "./models/Delivery";
+import { Sale } from "./models/Sale";
+import { Customer } from "./models/Customer";
+import { Category } from "./models/Category";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -10,8 +15,8 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE,
   synchronize: true,
   logging: true,
-  // entities: [User],
-  entities: ["src/models/**/*.ts"],
+  entities: [Delivery, Order, Product, Category, Sale, Customer],
+  // entities: ["src/models/**/*.ts"],
   subscribers: [],
-  migrations: ["src/database/migrations/*.ts"],
+  // migrations: ["src/database/migrations/*.ts"],
 });

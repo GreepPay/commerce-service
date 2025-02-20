@@ -1,5 +1,7 @@
 import router from "./router";
 import "./product";
-import "./user";
+import "./sales";
+import "./delivery";
+import "./orders";
 
 export default router;

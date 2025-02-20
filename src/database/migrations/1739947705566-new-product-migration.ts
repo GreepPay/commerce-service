@@ -2,7 +2,7 @@ import type { MigrationInterface, QueryRunner } from "typeorm";
 import pkg from "typeorm";
 const { Table } = pkg;
 
-export class ProductTableMigrations1739929553834 implements MigrationInterface {
+export class NewProductMigration1739947705566 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({

@@ -1,15 +1,16 @@
 import router from "./routes";
 import { AppDataSource } from "./data-source.ts";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { swaggerSpec } from "./config/swagger.ts";
 
 // Initialize database connection
 let isDatabaseReady = false;
 
+const swaggerUiPath = join(__dirname, "../node_modules/swagger-ui-dist");
+
 AppDataSource.initialize()
   .then(() => {
-    console.log("Database connection established");
     isDatabaseReady = true;
 
     // Start server after database is ready
@@ -28,19 +29,17 @@ AppDataSource.initialize()
 
         // Serve Swagger UI
         if (url.pathname === "/api-docs") {
-          const swaggerHtml = readFileSync(
-            join(__dirname, "../node_modules/swagger-ui-dist/index.html"),
+          let swaggerHtml = readFileSync(
+            join(swaggerUiPath, "index.html"),
             "utf-8"
           );
-          return new Response(
-            swaggerHtml.replace(
-              "https://petstore.swagger.io/v2/swagger.json",
-              "/swagger.json"
-            ),
-            {
-              headers: { "Content-Type": "text/html" },
-            }
+          swaggerHtml = swaggerHtml.replace(
+            "https://petstore.swagger.io/v2/swagger.json",
+            "/swagger.json"
           );
+          return new Response(swaggerHtml, {
+            headers: { "Content-Type": "text/html" },
+          });
         }
 
         // Serve OpenAPI specification
@@ -50,8 +49,15 @@ AppDataSource.initialize()
           });
         }
 
+        const filePath = join(swaggerUiPath, url.pathname);
+        if (existsSync(filePath)) {
+          const fileContent = readFileSync(filePath);
+          return new Response(fileContent, {
+            headers: { "Content-Type": getContentType(url.pathname) },
+          });
+        }
+
         // Handle API routes
-        console.log("this");
 
         return router.match(req);
       },
@@ -65,3 +71,11 @@ AppDataSource.initialize()
     console.error("Failed to initialize database:", error);
     process.exit(1);
   });
+
+function getContentType(pathname: string): string {
+  if (pathname.endsWith(".css")) return "text/css";
+  if (pathname.endsWith(".js")) return "application/javascript";
+  if (pathname.endsWith(".png")) return "image/png";
+  if (pathname.endsWith(".json")) return "application/json";
+  return "text/plain";
+}
