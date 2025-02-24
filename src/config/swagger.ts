@@ -4,9 +4,9 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Greep Auth API",
+      title: "Greep Commerce Microservice APIs",
       version: "1.0.0",
-      description: "API documentation for Greep Auth backend",
+      description: "API documentation for Greep Commerce backend",
     },
     servers: [
       {
