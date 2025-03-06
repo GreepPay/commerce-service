@@ -1,22 +1,27 @@
 import { DataSource } from "typeorm";
-import { Product } from "./models/Product";
-import { Order } from "./models/Order";
-import { Delivery } from "./models/Delivery";
-import { Sale } from "./models/Sale";
-import { Customer } from "./models/Customer";
-import { Category } from "./models/Category";
+import { User } from "./models/User";
+import fs from "fs";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT || "5432"),
-  username: process.env.DB_USERNAME,
+  username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   synchronize: true,
   logging: true,
-  entities: [Delivery, Order, Product, Category, Sale, Customer],
+  entities: [],
   // entities: ["src/models/**/*.ts"],
   subscribers: [],
-  // migrations: ["src/database/migrations/*.ts"],
+  ssl:
+    process.env.DB_USE_SSL === "true"
+      ? {
+          rejectUnauthorized: true,
+          ca: fs
+            .readFileSync(__dirname + "/database/ca-certificate.crt")
+            .toString(),
+        }
+      : false,
+  migrations: [],
 });

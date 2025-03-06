@@ -10,14 +10,15 @@ const swaggerUiPath = join(__dirname, "../node_modules/swagger-ui-dist");
 AppDataSource.initialize()
   .then(() => {
     Bun.serve({
-      port: parseInt(process.env.PORT || "8000"),
+      hostname: "0.0.0.0", // Bind to all IP addresses
+      port: parseInt(process.env.PORT || "8080"),
       async fetch(req: Request) {
         const url = new URL(req.url);
 
         if (url.pathname === "/api-docs") {
           let swaggerHtml = readFileSync(
             join(swaggerUiPath, "index.html"),
-            "utf-8"
+            "utf-8",
           );
 
           let initializerPath = join(swaggerUiPath, "swagger-initializer.js");
@@ -27,12 +28,12 @@ AppDataSource.initialize()
             let initializerContent = readFileSync(initializerPath, "utf-8");
             initializerContent = initializerContent.replace(
               "https://petstore.swagger.io/v2/swagger.json",
-              "/swagger.json"
+              "/swagger.json",
             );
 
             swaggerHtml = swaggerHtml.replace(
               /<script src=".\/swagger-initializer\.js" charset="UTF-8"> <\/script>/,
-              `<script>${initializerContent}</script>`
+              `<script>${initializerContent}</script>`,
             );
           }
 
@@ -61,7 +62,7 @@ AppDataSource.initialize()
     });
 
     console.log(
-      `Server running on http://localhost:${process.env.PORT || 8000}`
+      `Server running on http://localhost:${process.env.PORT || 8080}`,
     );
   })
   .catch((error) => console.log(error));
