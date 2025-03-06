@@ -3,11 +3,12 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run index.ts"
+    "start": "bun run index.ts",
+    "migrate:db": "npx typeorm-ts-node-esm migration:run -d src/data-source.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.13.0",
     "@types/swagger-jsdoc": "^6.0.4",
     "typescript": "^5.7.3"
   },
@@ -15,10 +16,17 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.8",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1",
     "reflect-metadata": "^0.2.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-dist": "^5.18.2",
-    "typeorm": "^0.3.20"
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.19.2",
+    "typeorm": "0.3.14"
   }
 }

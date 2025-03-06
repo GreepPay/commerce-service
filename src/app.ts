@@ -1,5 +1,5 @@
 import "./routes";
-import router from "./routes/router.ts"
+import router from "./routes/router";
 import { AppDataSource } from "./data-source.ts";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
