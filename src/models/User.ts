@@ -3,9 +3,9 @@ import { BaseModel } from './BaseModel';
 
 @Entity()
 export class User extends BaseModel {
-  @Column()
+  @Column({ type: "varchar" }) 
   name!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   email!: string;
 }
