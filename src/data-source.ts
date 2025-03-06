@@ -1,5 +1,4 @@
 import { DataSource } from "typeorm";
-import { User } from "./models/User";
 import fs from "fs";
 
 export const AppDataSource = new DataSource({
