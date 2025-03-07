@@ -22,5 +22,5 @@ export const AppDataSource = new DataSource({
             .toString(),
         }
       : false,
-  migrations: [],
+      migrations: ["src/database/migrations/*.ts"],
 });
