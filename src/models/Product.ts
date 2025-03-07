@@ -1,6 +1,7 @@
 import { Entity, Column, ManyToMany, JoinTable } from "typeorm";
 import { BaseModel } from "./BaseModel";
 import { Category } from "./Category";
+import type { Category as Categorytype} from "./Category";
 
 export enum ProductType {
   PHYSICAL = "physical",
@@ -91,7 +92,7 @@ export class Product extends BaseModel {
   // Relationships
   @ManyToMany(() => Category)
   @JoinTable()
-  categories!: Category[];
+  categories!: Categorytype[];
 
   // SEO & Visibility
   @Column({ type: "varchar", length: 255, nullable: true })

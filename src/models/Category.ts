@@ -1,6 +1,7 @@
 import { Entity, Column, ManyToMany } from "typeorm";
 import { BaseModel } from "./BaseModel";
 import { Product } from "./Product";
+import type { Product as Producttype} from "./Product";
 
 @Entity()
 export class Category extends BaseModel {
@@ -11,5 +12,5 @@ export class Category extends BaseModel {
   slug!: string;
 
   @ManyToMany(() => Product, (product) => product.categories)
-  products!: Product[];
+  products!: Producttype[];
 }

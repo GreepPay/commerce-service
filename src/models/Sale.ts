@@ -1,6 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
 import { BaseModel } from "./BaseModel";
 import { Customer } from "./Customer";
+import type { Customer as Customertype} from "./Customer";
 
 export enum SaleStatus {
   PENDING = "pending",
@@ -25,7 +26,7 @@ export class Sale extends BaseModel {
 
   @ManyToOne(() => Customer)
   @JoinColumn()
-  customer!: Customer;
+  customer!: Customertype;
 
   @Column({ type: "uuid" })
   customerId!: string;

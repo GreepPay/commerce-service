@@ -1,9 +1,12 @@
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 import { BaseModel } from "./BaseModel";
 import { Customer } from "./Customer";
+import type { Customer as Customertype} from "./Customer";
 import { Product } from "./Product";
 import { Delivery } from "./Delivery";
+import type { Delivery as Deliverytype} from "./Delivery";
 import { Sale } from "./Sale";
+import type { Sale as Saletype} from "./Sale";
 
 export enum OrderStatus {
   PENDING = "pending",
@@ -31,11 +34,11 @@ export class Order extends BaseModel {
 
   @ManyToOne(() => Customer)
   @JoinColumn()
-  customer!: Customer;
+  customer!: Customertype;
 
   @ManyToOne(() => Sale)
   @JoinColumn()
-  sale!: Sale;
+  sale!: Saletype;
 
   @Column({ type: "jsonb" })
   items!: Array<{
@@ -123,7 +126,7 @@ export class Order extends BaseModel {
   };
 
   @OneToMany(() => Delivery, (delivery) => delivery.order)
-  deliveries!: Delivery[];
+  deliveries!: Deliverytype[];
 
   @Column({ type: "jsonb" })
   statusHistory!: Array<{

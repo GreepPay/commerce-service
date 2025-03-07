@@ -1,10 +1,11 @@
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
 import { BaseModel } from "./BaseModel";
-import { Order as Ordertype} from "./Order";
+import type { Order as Ordertype} from "./Order";
+import { Order } from "./Order";
 
 @Entity()
 export class Delivery extends BaseModel {
-  @ManyToOne(() => Ordertype, { nullable: false })
+  @ManyToOne(() => Order, { nullable: false })
   @JoinColumn()
   order!: Ordertype;
 
