@@ -4,10 +4,10 @@ import { Product } from "./Product";
 
 @Entity()
 export class Category extends BaseModel {
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   name!: string;
 
-  @Column({ unique: true })
+  @Column({ type: "varchar", length: 255, unique: true })
   slug!: string;
 
   @ManyToMany(() => Product, (product) => product.categories)

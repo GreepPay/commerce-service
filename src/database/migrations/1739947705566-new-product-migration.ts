@@ -13,30 +13,58 @@ export class NewProductMigration1739947705566 implements MigrationInterface {
             type: "uuid",
             isPrimary: true,
             generationStrategy: "uuid",
+            default: "uuid_generate_v4()",
           },
-          { name: "sku", type: "varchar", isUnique: true },
-          { name: "name", type: "varchar" },
+          { name: "sku", type: "varchar", length: "255", isUnique: true },
+          { name: "name", type: "varchar", length: "255" },
+          { name: "slug", type: "varchar", length: "255", isUnique: true },
           { name: "description", type: "text" },
-          { name: "status", type: "varchar", default: "'draft'" },
           { name: "price", type: "decimal", precision: 10, scale: 2 },
-          { name: "currency", type: "varchar", length: "3" },
-          { name: "taxCode", type: "varchar" },
+          { name: "currency", type: "varchar", length: "3", default: "'USD'" },
+          { name: "taxCode", type: "varchar", length: "50", isNullable: true },
+          {
+            name: "type",
+            type: "enum",
+            enum: ["physical", "digital", "subscription"],
+            default: "'physical'",
+          },
+          {
+            name: "status",
+            type: "enum",
+            enum: ["draft", "active", "archived", "discontinued", "out_of_stock"],
+            default: "'active'",
+          },
           { name: "inventoryCount", type: "int", isNullable: true },
           { name: "stockThreshold", type: "int", isNullable: true },
           { name: "isBackorderAllowed", type: "boolean", default: false },
-          { name: "availabilityDate", type: "timestamp", isNullable: true },
-          { name: "slug", type: "varchar", isUnique: true },
-          { name: "metaTitle", type: "varchar", isNullable: true },
+          { name: "downloadUrl", type: "varchar", length: "255", isNullable: true },
+          { name: "downloadLimit", type: "int", isNullable: true },
+          { name: "dimensions", type: "jsonb", isNullable: true },
+          { name: "weight", type: "decimal", precision: 10, scale: 2, isNullable: true },
+          { name: "billingInterval", type: "varchar", length: "50", isNullable: true },
+          { name: "trialPeriodDays", type: "int", isNullable: true },
+          { name: "metaTitle", type: "varchar", length: "255", isNullable: true },
           { name: "metaDescription", type: "text", isNullable: true },
           { name: "isVisible", type: "boolean", default: true },
-          { name: "tags", type: "text", isArray: true },
+          { name: "images", type: "jsonb", default: "'[]'" },
+          {
+            name: "createdAt",
+            type: "timestamp",
+            default: "CURRENT_TIMESTAMP",
+          },
+          {
+            name: "updatedAt",
+            type: "timestamp",
+            default: "CURRENT_TIMESTAMP",
+            onUpdate: "CURRENT_TIMESTAMP",
+          },
         ],
       }),
-      true
+      true,
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable("products");
+    await queryRunner.dropTable("product");
   }
 }

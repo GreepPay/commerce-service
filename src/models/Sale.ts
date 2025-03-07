@@ -20,29 +20,29 @@ export enum PaymentMethod {
 
 @Entity()
 export class Sale extends BaseModel {
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   transactionId!: string;
 
   @ManyToOne(() => Customer)
   @JoinColumn()
-  customer!: typeof Customer;
+  customer!: Customer;
 
-  @Column()
+  @Column({ type: "uuid" })
   customerId!: string;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   subtotalAmount!: number;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   taxAmount!: number;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   discountAmount!: number;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   totalAmount!: number;
 
-  @Column({ default: "NGN" })
+  @Column({ type: "varchar", length: 3, default: "NGN" })
   currency!: string;
 
   @Column({
@@ -52,7 +52,7 @@ export class Sale extends BaseModel {
   })
   status!: SaleStatus;
 
-  @Column("jsonb")
+  @Column({ type: "jsonb" })
   items!: Array<{
     productId: string;
     sku: string;
@@ -66,7 +66,7 @@ export class Sale extends BaseModel {
     total: number;
   }>;
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: "jsonb", nullable: true })
   appliedDiscounts?: Array<{
     code: string;
     type: "percentage" | "fixed_amount";
@@ -74,7 +74,7 @@ export class Sale extends BaseModel {
     description: string;
   }>;
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: "jsonb", nullable: true })
   taxDetails?: Array<{
     type: string;
     rate: number;
@@ -82,7 +82,7 @@ export class Sale extends BaseModel {
     description: string;
   }>;
 
-  @Column("jsonb")
+  @Column({ type: "jsonb" })
   paymentDetails!: {
     method: PaymentMethod;
     transactionDate: Date;
@@ -91,7 +91,7 @@ export class Sale extends BaseModel {
     receiptNumber?: string;
   };
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: "jsonb", nullable: true })
   refundDetails?: Array<{
     transactionId: string;
     amount: number;
@@ -101,6 +101,6 @@ export class Sale extends BaseModel {
     notes?: string;
   }>;
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: "jsonb", nullable: true })
   metadata?: Record<string, any>;
 }

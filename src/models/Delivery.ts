@@ -1,41 +1,39 @@
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
 import { BaseModel } from "./BaseModel";
-
-// Import Order here but use it as a type later
 import { Order } from "./Order";
 
 @Entity()
 export class Delivery extends BaseModel {
   @ManyToOne(() => Order, { nullable: false })
   @JoinColumn()
-  order!: typeof Order;
+  order!: Order;
 
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   trackingNumber!: string;
 
-  @Column()
+  @Column({ type: "varchar", length: 50 })
   status!: string; // e.g., pending, shipped, delivered, failed
 
-  @Column()
+  @Column({ type: "timestamp" })
   estimatedDeliveryDate!: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: "timestamp", nullable: true })
   actualDeliveryDate?: Date;
 
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   deliveryAddress!: string;
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: "jsonb", nullable: true })
   metadata?: Record<string, any>;
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: "jsonb", nullable: true })
   trackingUpdates?: Array<{
     timestamp: Date;
     status: string;
     location?: string;
   }>;
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: "jsonb", nullable: true })
   deliveryAttempts?: Array<{
     attemptDate: Date;
     status: string;
