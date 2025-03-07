@@ -1,12 +1,12 @@
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
 import { BaseModel } from "./BaseModel";
-import { Order } from "./Order";
+import { Order as Ordertype} from "./Order";
 
 @Entity()
 export class Delivery extends BaseModel {
-  @ManyToOne(() => Order, { nullable: false })
+  @ManyToOne(() => Ordertype, { nullable: false })
   @JoinColumn()
-  order!: Order;
+  order!: Ordertype;
 
   @Column({ type: "varchar", length: 255 })
   trackingNumber!: string;
