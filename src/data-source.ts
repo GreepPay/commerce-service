@@ -11,6 +11,7 @@ export const AppDataSource = new DataSource({
   synchronize: true,
   logging: true,
   entities: [],
+  schema: "commerce_service",
   // entities: ["src/models/**/*.ts"],
   subscribers: [],
   ssl:
