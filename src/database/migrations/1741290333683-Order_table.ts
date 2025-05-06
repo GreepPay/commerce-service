@@ -45,12 +45,12 @@ export class OrderTable1741290333683 implements MigrationInterface {
           { name: "statusHistory", type: "jsonb", isNullable: false },
           {
             name: "customerId",
-            type: "uuid",
+            type: "int",
             isNullable: false,
           },
           {
             name: "saleId",
-            type: "uuid",
+            type: "int",
             isNullable: false,
           },
           {

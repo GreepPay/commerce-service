@@ -26,7 +26,7 @@ export class DeliveryTable1741290351990 implements MigrationInterface {
           { name: "deliveryAttempts", type: "jsonb", isNullable: true },
           {
             name: "orderId",
-            type: "uuid",
+            type: "int",
             isNullable: false,
           },
           {

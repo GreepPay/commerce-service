@@ -17,7 +17,7 @@ export class SaleTable1741290310272 implements MigrationInterface {
             generationStrategy: "increment",
           },
           { name: "transactionId", type: "varchar", length: "255", isNullable: false },
-          { name: "customerId", type: "uuid", isNullable: false },
+          { name: "customerId", type: "int", isNullable: false },
           { name: "subtotalAmount", type: "decimal", precision: 10, scale: 2, isNullable: false },
           { name: "taxAmount", type: "decimal", precision: 10, scale: 2, isNullable: false },
           { name: "discountAmount", type: "decimal", precision: 10, scale: 2, isNullable: false },
