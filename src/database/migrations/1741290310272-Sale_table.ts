@@ -3,7 +3,7 @@ import type { MigrationInterface, QueryRunner } from "typeorm";
 import pkg from "typeorm";
 const { Table, TableForeignKey } = pkg;
 
-export class SaleTable1741290369397 implements MigrationInterface {
+export class SaleTable1741290310272 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
@@ -55,7 +55,7 @@ export class SaleTable1741290369397 implements MigrationInterface {
       new TableForeignKey({
         columnNames: ["customerId"],
         referencedColumnNames: ["id"],
-        referencedTableName: "customer",
+        referencedTableName: "commerce_service.customer",
         onDelete: "CASCADE",
       }),
     );
