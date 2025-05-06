@@ -1,7 +1,6 @@
 import { OrderStatus, PaymentStatus } from "../models/Order";
 
 export interface Order {
-  id?: string;
   customerId: string;
   saleId?: string;
   items: OrderItem[];

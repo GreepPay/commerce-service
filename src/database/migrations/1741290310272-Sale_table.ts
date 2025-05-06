@@ -11,10 +11,10 @@ export class SaleTable1741290310272 implements MigrationInterface {
         columns: [
           {
             name: "id",
-            type: "uuid",
+            type: "int",
             isPrimary: true,
-            generationStrategy: "uuid",
-            default: "uuid_generate_v4()",
+            isGenerated: true,
+            generationStrategy: "increment",
           },
           { name: "transactionId", type: "varchar", length: "255", isNullable: false },
           { name: "customerId", type: "uuid", isNullable: false },

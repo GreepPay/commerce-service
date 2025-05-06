@@ -5,7 +5,6 @@
 // ========================
 
 export interface BaseProduct {
-  id: string; // UUIDv4
   sku: string;
   name: string;
   description: string;

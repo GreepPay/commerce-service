@@ -11,10 +11,10 @@ export class OrderTable1741290333683 implements MigrationInterface {
         columns: [
           {
             name: "id",
-            type: "uuid",
+            type: "int",
             isPrimary: true,
-            generationStrategy: "uuid",
-            default: "uuid_generate_v4()",
+            isGenerated: true,
+            generationStrategy: "increment",
           },
           { name: "orderNumber", type: "varchar", length: "255", isNullable: false },
           { name: "items", type: "jsonb", isNullable: false },

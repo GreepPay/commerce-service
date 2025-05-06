@@ -11,10 +11,10 @@ export class CustomerTable1741290310271 implements MigrationInterface {
         columns: [
           {
             name: "id",
-            type: "uuid",
+            type: "int",
             isPrimary: true,
-            generationStrategy: "uuid",
-            default: "uuid_generate_v4()",
+            isGenerated: true,
+            generationStrategy: "increment",
           },
           { name: "firstName", type: "varchar", length: "255", isNullable: false },
           { name: "lastName", type: "varchar", length: "255", isNullable: false },

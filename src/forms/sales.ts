@@ -91,7 +91,6 @@ export interface SaleItem {
 }
 
 export interface Sale {
-  id: string;
   transactionId: string;
   customerId: string;
   items: SaleItem[];

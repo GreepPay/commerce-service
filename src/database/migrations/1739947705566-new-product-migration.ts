@@ -10,10 +10,10 @@ export class NewProductMigration1739947705566 implements MigrationInterface {
         columns: [
           {
             name: "id",
-            type: "uuid",
+            type: "int",
             isPrimary: true,
-            generationStrategy: "uuid",
-            default: "uuid_generate_v4()",
+            isGenerated: true,
+            generationStrategy: "increment",
           },
           { name: "sku", type: "varchar", length: "255", isUnique: true },
           { name: "name", type: "varchar", length: "255" },

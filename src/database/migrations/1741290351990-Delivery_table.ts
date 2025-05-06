@@ -11,10 +11,10 @@ export class DeliveryTable1741290351990 implements MigrationInterface {
         columns: [
           {
             name: "id",
-            type: "uuid",
+            type: "int",
             isPrimary: true,
-            generationStrategy: "uuid",
-            default: "uuid_generate_v4()",
+            isGenerated: true,
+            generationStrategy: "increment",
           },
           { name: "trackingNumber", type: "varchar", length: "255", isNullable: false },
           { name: "status", type: "varchar", length: "50", isNullable: false },

@@ -21,7 +21,6 @@ export enum DeliveryStatus {
 }
 
 export interface Delivery {
-  id: string;
   orderId: string;
   carrier: Carrier;
   trackingNumber: string;
