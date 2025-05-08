@@ -68,15 +68,15 @@ export class OrderTable1741290333683 implements MigrationInterface {
       }),
     );
 
-    await queryRunner.createForeignKey(
-      "order",
-      new TableForeignKey({
-        columnNames: ["customerId"],
-        referencedColumnNames: ["id"],
-        referencedTableName: "commerce_service.customer",
-        onDelete: "CASCADE",
-      }),
-    );
+    // await queryRunner.createForeignKey(
+    //   "order",
+    //   new TableForeignKey({
+    //     columnNames: ["customerId"],
+    //     referencedColumnNames: ["id"],
+    //     referencedTableName: "commerce_service.customer",
+    //     onDelete: "CASCADE",
+    //   }),
+    // );
 
     await queryRunner.createForeignKey(
       "order",

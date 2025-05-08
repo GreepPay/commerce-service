@@ -50,15 +50,15 @@ export class SaleTable1741290310272 implements MigrationInterface {
       }),
     );
 
-    await queryRunner.createForeignKey(
-      "sale",
-      new TableForeignKey({
-        columnNames: ["customerId"],
-        referencedColumnNames: ["id"],
-        referencedTableName: "commerce_service.customer",
-        onDelete: "CASCADE",
-      }),
-    );
+    // await queryRunner.createForeignKey(
+    //   "sale",
+    //   new TableForeignKey({
+    //     columnNames: ["customerId"],
+    //     referencedColumnNames: ["id"],
+    //     referencedTableName: "commerce_service.customer",
+    //     onDelete: "CASCADE",
+    //   }),
+    // );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
