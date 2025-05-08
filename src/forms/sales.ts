@@ -6,7 +6,7 @@ export interface CartItem {
 }
 
 export interface ProcessSaleRequest {
-  customerId: string;
+  customerId: number;
   items: CartItem[];
   discountCodes?: string[];
   paymentMethod: PaymentMethod;
@@ -35,7 +35,7 @@ export interface TaxCalculationRequest {
 }
 
 export interface SaleFilters {
-  customerId?: string;
+  customerId?: number;
   status?: SaleStatus;
   fromDate?: Date;
   toDate?: Date;
@@ -56,7 +56,7 @@ export interface Discount {
   currentUsage?: number;
   productIds?: string[]; // Specific products this discount applies to
   categoryIds?: string[]; // Specific categories this discount applies to
-  customerIds?: string[]; // Specific customers who can use this discount
+  customerIds?: number[]; // Specific customers who can use this discount
   metadata?: Record<string, any>;
 }
 
@@ -92,7 +92,7 @@ export interface SaleItem {
 
 export interface Sale {
   transactionId: string;
-  customerId: string;
+  customerId: number;
   items: SaleItem[];
   subtotalAmount: number;
   taxAmount: number;

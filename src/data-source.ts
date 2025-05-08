@@ -25,7 +25,7 @@ export const AppDataSource = new DataSource({
             .toString(),
         }
       : false,
-  // entities: ["src/models/**/*.ts"],
+  entities: ["src/models/**/*.ts"],
   subscribers: [],
   migrations: ["src/database/migrations/*.ts"],
 });

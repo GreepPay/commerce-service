@@ -16,7 +16,7 @@ export interface BaseProduct {
   categoryIds: string[];
   tags: string[];
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date; 
 }
 
 export interface ICreateProduct {
@@ -25,7 +25,7 @@ export interface ICreateProduct {
   type: ProductType;
   price: number;
   status: ProductStatus;
-  currency: string; // ISO 4217
+  currency: string;
   categoryIds: string[];
   tags: string[];
 }

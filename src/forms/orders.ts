@@ -1,7 +1,7 @@
 import { OrderStatus, PaymentStatus } from "../models/Order";
 
 export interface Order {
-  customerId: string;
+  customerId: number;
   saleId?: string;
   items: OrderItem[];
   shippingAddress: Address;
