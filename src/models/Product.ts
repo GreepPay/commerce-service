@@ -1,12 +1,14 @@
-import { Entity, Column, ManyToMany, JoinTable } from "typeorm";
+import { Entity, Column, ManyToMany, JoinTable, OneToMany } from "typeorm";
 import { BaseModel } from "./BaseModel";
 import { Category } from "./Category";
-import type { Category as Categorytype} from "./Category";
+import type { Category as Categorytype } from "./Category";
+import type { ProductVariant } from "../forms/products";
 
 export enum ProductType {
   PHYSICAL = "physical",
   DIGITAL = "digital",
   SUBSCRIPTION = "subscription",
+  EVENT = "event",
 }
 
 export enum ProductStatus {
@@ -15,6 +17,12 @@ export enum ProductStatus {
   ARCHIVED = "archived",
   DISCONTINUED = "discontinued",
   OUT_OF_STOCK = "out_of_stock",
+}
+
+export enum EventType {
+  ONLINE = "online",
+  OFFLINE = "offline",
+  HYBRID = "hybrid",
 }
 
 @Entity()
@@ -54,6 +62,9 @@ export class Product extends BaseModel {
   })
   status!: ProductStatus;
 
+  @Column({ type: "jsonb", default: "[]" })
+  variants!: ProductVariant[];
+
   // Inventory Management
   @Column({ type: "int", nullable: true })
   inventoryCount?: number;
@@ -88,6 +99,44 @@ export class Product extends BaseModel {
 
   @Column({ type: "int", nullable: true })
   trialPeriodDays?: number;
+
+  // Event Product Fields
+  @Column({ type: "enum", enum: EventType, nullable: true })
+  eventType?: EventType;
+
+  @Column({ type: "timestamp", nullable: true })
+  eventStartDate?: Date;
+
+  @Column({ type: "timestamp", nullable: true })
+  eventEndDate?: Date;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  venueName?: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  eventOnlineUrl?: string;
+
+  @Column({ type: "jsonb", nullable: true })
+  eventLocation?: {
+    address: string;
+    city: string;
+    state?: string;
+    country: string;
+    postalCode?: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+
+  @Column({ type: "int", nullable: true })
+  eventCapacity?: number;
+
+  @Column({ type: "int", default: 0 })
+  eventRegisteredCount!: number;
+
+  @Column({ type: "boolean", default: false })
+  eventWaitlistEnabled!: boolean;
 
   // Relationships
   @ManyToMany(() => Category)

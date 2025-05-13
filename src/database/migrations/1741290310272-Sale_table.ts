@@ -16,17 +16,58 @@ export class SaleTable1741290310272 implements MigrationInterface {
             isGenerated: true,
             generationStrategy: "increment",
           },
-          { name: "transactionId", type: "varchar", length: "255", isNullable: false },
+          {
+            name: "transactionId",
+            type: "varchar",
+            length: "255",
+            isNullable: false,
+          },
           { name: "customerId", type: "int", isNullable: false },
-          { name: "subtotalAmount", type: "decimal", precision: 10, scale: 2, isNullable: false },
-          { name: "taxAmount", type: "decimal", precision: 10, scale: 2, isNullable: false },
-          { name: "discountAmount", type: "decimal", precision: 10, scale: 2, isNullable: false },
-          { name: "totalAmount", type: "decimal", precision: 10, scale: 2, isNullable: false },
-          { name: "currency", type: "varchar", length: "3", default: "'NGN'", isNullable: false },
+          {
+            name: "subtotalAmount",
+            type: "decimal",
+            precision: 10,
+            scale: 2,
+            isNullable: false,
+          },
+          {
+            name: "taxAmount",
+            type: "decimal",
+            precision: 10,
+            scale: 2,
+            isNullable: false,
+          },
+          {
+            name: "discountAmount",
+            type: "decimal",
+            precision: 10,
+            scale: 2,
+            isNullable: false,
+          },
+          {
+            name: "totalAmount",
+            type: "decimal",
+            precision: 10,
+            scale: 2,
+            isNullable: false,
+          },
+          {
+            name: "currency",
+            type: "varchar",
+            length: "3",
+            default: "'NGN'",
+            isNullable: false,
+          },
           {
             name: "status",
             type: "enum",
-            enum: ["pending", "completed", "refunded", "partially_refunded", "cancelled"],
+            enum: [
+              "pending",
+              "completed",
+              "refunded",
+              "partially_refunded",
+              "cancelled",
+            ],
             default: "'pending'",
           },
           { name: "items", type: "jsonb", isNullable: false },
@@ -35,6 +76,12 @@ export class SaleTable1741290310272 implements MigrationInterface {
           { name: "paymentDetails", type: "jsonb", isNullable: false },
           { name: "refundDetails", type: "jsonb", isNullable: true },
           { name: "metadata", type: "jsonb", isNullable: true },
+          {
+            name: "variantId",
+            type: "varchar",
+            length: "50",
+            isNullable: true,
+          },
           {
             name: "createdAt",
             type: "timestamp",
@@ -47,7 +94,7 @@ export class SaleTable1741290310272 implements MigrationInterface {
             onUpdate: "CURRENT_TIMESTAMP",
           },
         ],
-      }),
+      })
     );
 
     // await queryRunner.createForeignKey(

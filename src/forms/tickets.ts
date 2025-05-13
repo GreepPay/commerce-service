@@ -1,19 +1,14 @@
-import { type Event } from "./events";
-
-export enum TicketType {
-  REGULAR = "regular",
-  VIP = "vip",
-  VIP_PLUS = "vip+",
-}
+export type TicketStatus = "active" | "used" | "cancelled" | "expired";
 
 export interface Ticket {
   id?: number;
-  eventId: number;
-  event?: Event;
+  productId: number;
+  variantId?: string;
+  saleId?: number;
   userId: string;
-  ticketType: TicketType;
+  ticketType: string;
   price: number;
   qrCode: string;
+  status?: TicketStatus;
   createdAt?: Date;
-  updatedAt?: Date;
 }

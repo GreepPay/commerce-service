@@ -3,6 +3,7 @@ import { SaleStatus, PaymentMethod } from "../models/Sale";
 export interface CartItem {
   productId: string;
   quantity: number;
+  variantId: string;
 }
 
 export interface ProcessSaleRequest {
@@ -78,6 +79,7 @@ export interface TaxRate {
 }
 
 export interface SaleItem {
+  variantId?: string;
   productId: string;
   sku: string;
   name: string;

@@ -81,6 +81,31 @@ export interface SubscriptionProduct {
   };
 }
 
+export interface EventProduct {
+  type: "event";
+  eventType: EventType;
+  eventDetails: {
+    startDate: Date;
+    endDate: Date;
+    venueName?: string;
+    onlineUrl?: string;
+    location?: {
+      address: string;
+      city: string;
+      state?: string;
+      country: string;
+      postalCode?: string;
+      coordinates?: {
+        lat: number;
+        lng: number;
+      };
+    };
+    capacity?: number;
+    registeredCount: number;
+    waitlistEnabled: boolean;
+  };
+}
+
 // ========================
 // Variant Support
 // ========================
@@ -102,6 +127,7 @@ export enum ProductType {
   PHYSICAL = "physical",
   DIGITAL = "digital",
   SUBSCRIPTION = "subscription",
+  EVENT = "event", 
 }
 
 export enum ProductStatus {
@@ -127,6 +153,12 @@ export enum LicenseType {
   SINGLE_USE = "single",
   MULTI_USE = "multi",
   PERPETUAL = "perpetual",
+}
+
+export enum EventType {
+  ONLINE = "online",
+  OFFLINE = "offline",
+  HYBRID = "hybrid",
 }
 
 // ========================

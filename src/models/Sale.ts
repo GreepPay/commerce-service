@@ -63,6 +63,7 @@ export class Sale extends BaseModel {
     subtotal: number;
     taxRate: number;
     taxAmount: number;
+    variantId?: string;
     discountAmount: number;
     total: number;
   }>;
