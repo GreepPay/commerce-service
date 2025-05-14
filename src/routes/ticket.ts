@@ -80,6 +80,6 @@ router.add("POST", `/${APP_VERSION}/tickets`, async (request: BunRequest) => {
  *       404:
  *         description: Ticket not found
  */
-router.add("PATCH", `/${APP_VERSION}/tickets/:id`, async (request: BunRequest) => {
+router.add("PUT", `/${APP_VERSION}/tickets/:id`, async (request: BunRequest) => {
   return ticketController.updateTicket(request);
 });
