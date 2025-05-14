@@ -8,19 +8,18 @@ import {
 } from "typeorm";
 import { Product } from "./Product";
 import { Sale } from "./Sale";
+import { BaseModel } from "./BaseModel";
 
 export enum TicketStatus {
   ACTIVE = "active",
   USED = "used",
   CANCELLED = "cancelled",
   EXPIRED = "expired",
+  PENDING = "pending",
 }
 
 @Entity()
-export class Ticket {
-  static getRepository(): import("typeorm").Repository<Ticket> | undefined {
-    throw new Error("Method not implemented.");
-  }
+export class Ticket extends BaseModel {
   @PrimaryGeneratedColumn()
   id!: number;
 

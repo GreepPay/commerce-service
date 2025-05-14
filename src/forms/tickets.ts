@@ -1,4 +1,4 @@
-export type TicketStatus = "active" | "used" | "cancelled" | "expired";
+import { TicketStatus } from "../models/Ticket";
 
 export interface Ticket {
   id?: number;
@@ -9,6 +9,16 @@ export interface Ticket {
   ticketType: string;
   price: number;
   qrCode: string;
-  status?: TicketStatus;
+  status: TicketStatus;
   createdAt?: Date;
+}
+
+export interface ICreateTicket {
+  productId: string;
+  saleId: string;
+  userId: string;
+  variantId?: string;
+  ticketType: string;
+  price: number;
+  status?: TicketStatus;
 }

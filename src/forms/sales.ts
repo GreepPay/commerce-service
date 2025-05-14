@@ -3,7 +3,7 @@ import { SaleStatus, PaymentMethod } from "../models/Sale";
 export interface CartItem {
   productId: string;
   quantity: number;
-  variantId: string;
+  variantId?: string;
 }
 
 export interface ProcessSaleRequest {

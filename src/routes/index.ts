@@ -3,5 +3,6 @@ import "./product";
 import "./sales";
 import "./delivery";
 import "./orders";
+import "./ticket";
 
 export default router;

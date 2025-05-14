@@ -4,19 +4,22 @@ import {
   PaymentStatus,
 } from "../models/Order";
 import { Product } from "../models/Product";
-import { EntityManager } from "typeorm";
+import { EntityManager, In } from "typeorm";
 import HttpResponse, { type HttpResponseType } from "../common/HttpResponse";
 import type { Order } from "../forms/orders";
 import { SaleService } from "./SaleService";
 import { DeliveryService } from "./DeliveryService";
 import { DeliveryStatus } from "../forms/delivery";
-import type { PaymentMethod } from "../models/Sale";
+import { PaymentMethod } from "../models/Sale";
 import { Delivery } from "../models/Delivery";
+import type { TicketService } from "./TicketService";
+import { ProductType } from "../forms/products";
 
 export class OrderService {
   constructor(
     private readonly saleService: SaleService,
-    private readonly deliveryService: DeliveryService
+    private readonly deliveryService: DeliveryService,
+    private readonly ticketService: TicketService
   ) {}
 
   private generateOrderNumber(): string {
@@ -32,15 +35,14 @@ export class OrderService {
 
   async createOrder(orderData: Order): Promise<HttpResponseType> {
     try {
-      // Process the sale first
       const saleResult = await this.saleService.processSale({
         customerId: orderData.customerId,
         items: orderData.items.map((item) => ({
           productId: item.productId,
+          variantId: item.variantId || undefined,
           quantity: item.quantity,
         })),
-        paymentMethod:
-          (orderData.paymentMethod as PaymentMethod) || "CREDIT_CARD",
+        paymentMethod: orderData.paymentMethod as PaymentMethod,
         metadata: {
           orderNumber: this.generateOrderNumber(),
         },
@@ -52,9 +54,8 @@ export class OrderService {
 
       const sale = saleResult.body.data;
 
-      // Create order with transaction
       return await OrderModel.getRepository().manager.transaction(
-        async (transactionalEntityManager: EntityManager) => {
+        async (manager: EntityManager) => {
           // Create order
           const order = new OrderModel();
           Object.assign(order, {
@@ -91,17 +92,14 @@ export class OrderService {
             ],
           });
 
-          // Save the order first
-          const savedOrder = await transactionalEntityManager.save(order);
+          const savedOrder = await manager.save(order);
 
-          // Create delivery record within the same transaction
+          // Create delivery
           const delivery = new Delivery();
           Object.assign(delivery, {
-            order: savedOrder, // Pass the entire saved order entity
+            order: savedOrder,
             status: DeliveryStatus.PENDING,
-            estimatedDeliveryDate: new Date(
-              Date.now() + 7 * 24 * 60 * 60 * 1000
-            ),
+            estimatedDeliveryDate: new Date(Date.now() + 7 * 86400000),
             deliveryAddress: JSON.stringify(orderData.shippingAddress),
             trackingNumber: `TRK-${Date.now()}`,
             trackingUpdates: [
@@ -113,8 +111,32 @@ export class OrderService {
             ],
           });
 
-          // Save delivery using the transaction manager
-          const savedDelivery = await transactionalEntityManager.save(delivery);
+          const savedDelivery = await manager.save(delivery);
+
+          // ✅ Check if event-type product exists in sale items
+          const eventProducts = await Product.findBy({
+            id: In(
+              sale.items.map((item: { productId: any }) => item.productId)
+            ),
+            type: ProductType.EVENT,
+          });
+
+          if (eventProducts.length > 0) {
+            const createdTickets = await this.ticketService.createFromSale(
+              sale,
+              manager
+            );
+            return HttpResponse.success(
+              "Order created with tickets",
+              {
+                order: savedOrder,
+                sale,
+                delivery: savedDelivery,
+                tickets: createdTickets,
+              },
+              201
+            );
+          }
 
           return HttpResponse.success(
             "Order created successfully",

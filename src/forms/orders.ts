@@ -33,6 +33,7 @@ export interface OrderItem {
   taxAmount?: number;
   discountAmount?: number;
   total?: number;
+  variantId?: string;
 }
 
 export interface StatusUpdate {

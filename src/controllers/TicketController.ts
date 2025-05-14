@@ -1,41 +1,19 @@
 import { TicketService } from "../services/TicketService";
-import HttpResponse from "../common/HttpResponse";
 import type { BunRequest } from "../routes/router";
-import { TicketStatus } from "../models/Ticket";
-import type { EntityManager } from "typeorm";
+import type { ICreateTicket } from "../forms/tickets";
 
 export class TicketController {
-  private ticketService: TicketService;
+  private ticketService = new TicketService();
 
-  constructor() {
-    this.ticketService = new TicketService();
-  }
+  async updateTicket(request: BunRequest): Promise<Response> {
+    const { id } = request.params;
+    const updateData = await request.json() as Partial<ICreateTicket>;
 
-   async createTicketsFromSale(request: BunRequest): Promise<Response> {
-    try {
-      const { saleId } = (await request.json()) as { saleId: number };
-      const sale = await Sale.findOneBy({ id: saleId });
+    const result = await this.ticketService.updateTicket(id, updateData);
 
-      if (!sale) {
-        return new Response(
-          JSON.stringify(HttpResponse.notFound("Sale not found")),
-          { status: 404 }
-        );
-      }
-
-      const tickets = await AppDataSource.manager.transaction((manager: EntityManager) => {
-        return this.ticketService.createFromSale(sale, manager);
-      });
-
-      return new Response(
-        JSON.stringify(HttpResponse.success("Tickets created", tickets)),
-        { status: 201 }
-      );
-    } catch (error) {
-      return new Response(
-        JSON.stringify(HttpResponse.failure("Failed to create tickets", 400)),
-        { status: 400 }
-      );
-    }
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 }
