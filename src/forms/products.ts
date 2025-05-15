@@ -5,6 +5,7 @@
 // ========================
 
 export interface BaseProduct {
+  id: number;
   sku: string;
   name: string;
   description: string;

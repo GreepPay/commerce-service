@@ -15,6 +15,7 @@ export class NewProductMigration1739947705566 implements MigrationInterface {
             isGenerated: true,
             generationStrategy: "increment",
           },
+          { name: "businessId", type: "int" },
           { name: "sku", type: "varchar", length: "255", isUnique: true },
           { name: "name", type: "varchar", length: "255" },
           { name: "slug", type: "varchar", length: "255", isUnique: true },

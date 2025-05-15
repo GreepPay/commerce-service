@@ -27,6 +27,9 @@ export enum EventType {
 
 @Entity()
 export class Product extends BaseModel {
+  @Column({ type: "int", nullable: false })
+  businessId!: number;
+
   @Column({ type: "varchar", length: 255, unique: true })
   sku!: string;
 
