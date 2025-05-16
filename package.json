@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "start": "bun run index.ts",
-    "migrate:db": "npx typeorm-ts-node-esm migration:run -d src/data-source.ts"
+    "migrate:db": "npx typeorm-ts-node-esm migration:run -d src/data-source.ts",
+    "seed:products": "bun run src/seeders/runSeeders.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -16,6 +17,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.8.0",
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.8",
     "bcrypt": "^5.1.1",
