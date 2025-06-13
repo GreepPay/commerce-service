@@ -65,7 +65,7 @@ export class Product extends BaseModel {
   })
   status!: ProductStatus;
 
-  @Column({ type: getJsonType(), default: "[]" })
+  @Column({ type: getJsonType(), default: process.env.APP_STATE === "test" ? "[]" : () => "'[]'", })
   variants!: ProductVariant[];
 
   // Inventory Management
@@ -157,7 +157,7 @@ export class Product extends BaseModel {
   isVisible!: boolean;
 
   // Media
-  @Column({ type: getJsonType(), default: [] })
+  @Column({ type: getJsonType(), default: process.env.APP_STATE === "test" ? "[]" : () => "'[]'",})
   images!: Array<{
     url: string;
     altText: string;

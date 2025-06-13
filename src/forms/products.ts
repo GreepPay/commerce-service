@@ -29,6 +29,7 @@ export interface ICreateProduct {
   currency: string;
   categoryIds: string[];
   tags: string[];
+  businessId: number;
 }
 
 // ========================
