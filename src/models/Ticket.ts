@@ -41,7 +41,7 @@ export class Ticket extends BaseModel {
   sale!: Sale;
 
   @Column()
-  userId!: string;
+  userId!: number;
 
   @Column()
   ticketType!: string; // e.g. "VIP"

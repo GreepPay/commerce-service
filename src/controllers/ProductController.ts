@@ -1,7 +1,6 @@
 import { ProductService } from "../services/ProductService";
 import HttpResponse from "../common/HttpResponse";
-import type { BunRequest } from "../routes/router";
-import { Product } from "../models/Product";
+import type { BunRequest, Validation } from "../routes/router";
 import type { ICreateProduct } from "../forms/products";
 
 export class ProductController {
@@ -11,96 +10,132 @@ export class ProductController {
     this.productService = new ProductService();
   }
 
-  async getAllProducts(request: BunRequest) {
-    const result = await this.productService.getAllProducts();
-    return new Response(JSON.stringify(result.body), {
-      headers: { "Content-Type": "application/json" },
-      status: result.statusCode,
-    });
-  }
-
-  async getProductById(request: BunRequest) {
-    const id = request.params.id;
-    const result = await this.productService.getProductById(id);
-    return new Response(JSON.stringify(result.body), {
-      headers: { "Content-Type": "application/json" },
-      status: result.statusCode,
-    });
-  }
-
+  /**
+   * Handles creation of a new product.
+   * Validates incoming request body and delegates to the product service.
+   * @param request - Incoming HTTP request
+   * @returns HTTP response with created product or error
+   */
   async createProduct(request: BunRequest) {
-    const productData = (await request.json()) as ICreateProduct;
-    const result = await this.productService.createProduct(productData);
-    return new Response(JSON.stringify(result.body), {
-      headers: { "Content-Type": "application/json" },
-      status: result.statusCode,
-    });
+    try {
+      const validations: Validation[] = [
+        { field: "name", type: "string", required: true },
+        { field: "description", type: "string", required: true },
+        { field: "type", type: "string", required: true },
+        { field: "price", type: "number", required: true },
+        { field: "status", type: "string", required: false },
+        { field: "currency", type: "string", required: true },
+        { field: "categoryIds", type: "array", required: false },
+        { field: "tags", type: "array", required: false },
+      ];
+
+      let productData: ICreateProduct = (await request.validate(
+        validations
+      )) as ICreateProduct;
+
+      const result = await this.productService.createProduct(productData);
+
+      return HttpResponse.success("Product created successfully", result, 201);
+    } catch (error: any) {
+      return HttpResponse.failure(
+        error.message || "Internal server error",
+        error.status || 500
+      );
+    }
   }
 
+  /**
+   * Handles updating an existing product.
+   * Validates request and passes partial updates to the product service.
+   * @param request - Incoming HTTP request with updated fields and product ID
+   * @returns HTTP response with updated product or error
+   */
   async updateProduct(request: BunRequest) {
-    const id = request.params.id;
-    const productData = (await request.json()) as Partial<ICreateProduct>;
-    const result = await this.productService.updateProduct(id, productData);
-    return new Response(JSON.stringify(result.body), {
-      headers: { "Content-Type": "application/json" },
-      status: result.statusCode,
-    });
+    try {
+      const validations: Validation[] = [
+        { field: "id", type: "sring", required: true },
+        { field: "name", type: "string", required: false },
+        { field: "description", type: "string", required: false },
+        { field: "type", type: "string", required: false },
+        { field: "price", type: "number", required: false },
+        { field: "status", type: "string", required: false },
+        { field: "currency", type: "string", required: false },
+        { field: "categoryIds", type: "array", required: false },
+        { field: "tags", type: "array", required: false },
+      ];
+      const id = request.params.id;
+
+      let productData: ICreateProduct = (await request.validate(
+        validations
+      )) as ICreateProduct;
+
+      const result = await this.productService.updateProduct(
+        parseInt(id),
+        productData
+      );
+
+      return HttpResponse.success("Product updated successfully", result);
+    } catch (error: any) {
+      return HttpResponse.failure(
+        error.message || "Internal server error",
+        error.status || 500
+      );
+    }
   }
 
+  /**
+   * Handles deletion of a product by ID.
+   * Validates request and calls the service to delete the product.
+   * @param request - Incoming HTTP request with product ID
+   * @returns HTTP response indicating success or failure
+   */
   async deleteProduct(request: BunRequest) {
-    const id = request.params.id;
-    const result = await this.productService.deleteProduct(id);
-    return new Response(JSON.stringify(result.body), {
-      headers: { "Content-Type": "application/json" },
-      status: result.statusCode,
-    });
-  }
-
-  async adjustInventory(request: BunRequest): Promise<Response> {
     try {
-      const { id } = request.params;
-      const { count } = (await request.json()) as { count: number };
-      const result = await this.productService.adjustInventory(id, count);
-      return new Response(JSON.stringify(result), {
-        status: result.statusCode,
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(HttpResponse.failure("Failed to adjust inventory", 400)),
-        { status: 400 }
+      const validations: Validation[] = [
+        { field: "id", type: "string", required: true },
+      ];
+
+      const { id } = (await request.validate(validations)) as { id: string };
+
+      const result = await this.productService.deleteProduct(parseInt(id));
+
+      if (result === true) {
+        return HttpResponse.success("Product deleted successfully", null, 204);
+      }
+
+      return result;
+    } catch (error: any) {
+      return HttpResponse.failure(
+        error.message || "Internal server error",
+        error.status || 500
       );
     }
   }
 
-  async checkAvailability(request: BunRequest): Promise<Response> {
+  /**
+   * Adjusts the inventory count of a product.
+   * Validates request and calls the service to update the inventory.
+   * @param request - Incoming HTTP request with product ID and inventory count
+   * @returns HTTP response indicating adjustment success or failure
+   */
+  async adjustInventory(request: BunRequest) {
     try {
-      const { id } = request.params;
-      const result = await this.productService.checkAvailability(id);
-      return new Response(JSON.stringify(result), {
-        status: result.statusCode,
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(
-          HttpResponse.failure("Failed to check availability", 400)
-        ),
-        { status: 400 }
-      );
-    }
-  }
+      const validations: Validation[] = [
+        { field: "id", type: "string", required: true },
+        { field: "count", type: "number", required: true },
+      ];
 
-  async getProductTypes(request: BunRequest): Promise<Response> {
-    try {
-      const result = await this.productService.getProductTypes();
-      return new Response(JSON.stringify(result), {
-        status: result.statusCode,
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(
-          HttpResponse.failure("Failed to retrieve product types", 400)
-        ),
-        { status: 400 }
+      const { id, count } = (await request.validate(validations)) as {
+        id: string;
+        count: number;
+      };
+
+      await this.productService.adjustInventory(parseInt(id), count);
+      return HttpResponse.success("Inventory adjusted successfully", null, 204);
+    } catch (error: any) {
+      return HttpResponse.failure(
+        error.message || "Internal server error",
+        error.status || 500
       );
     }
   }

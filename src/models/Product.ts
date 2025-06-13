@@ -1,5 +1,5 @@
 import { Entity, Column, ManyToMany, JoinTable, OneToMany } from "typeorm";
-import { BaseModel } from "./BaseModel";
+import { BaseModel, getDateTimeType, getEnumType, getJsonType } from "./BaseModel";
 import { Category } from "./Category";
 import type { Category as Categorytype } from "./Category";
 import type { ProductVariant } from "../forms/products";
@@ -52,20 +52,20 @@ export class Product extends BaseModel {
   taxCode?: string;
 
   @Column({
-    type: "enum",
+    type: getEnumType(),
     enum: ProductType,
     default: ProductType.PHYSICAL,
   })
   type!: ProductType;
 
   @Column({
-    type: "enum",
+    type: getEnumType(),
     enum: ProductStatus,
     default: ProductStatus.ACTIVE,
   })
   status!: ProductStatus;
 
-  @Column({ type: "jsonb", default: "[]" })
+  @Column({ type: getJsonType(), default: "[]" })
   variants!: ProductVariant[];
 
   // Inventory Management
@@ -86,7 +86,7 @@ export class Product extends BaseModel {
   downloadLimit?: number;
 
   // Physical Product Fields
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   dimensions?: {
     length: number;
     width: number;
@@ -104,13 +104,13 @@ export class Product extends BaseModel {
   trialPeriodDays?: number;
 
   // Event Product Fields
-  @Column({ type: "enum", enum: EventType, nullable: true })
+  @Column({ type: getEnumType(), enum: EventType, nullable: true })
   eventType?: EventType;
 
-  @Column({ type: "timestamp", nullable: true })
+  @Column({ type: getDateTimeType(), nullable: true })
   eventStartDate?: Date;
 
-  @Column({ type: "timestamp", nullable: true })
+  @Column({ type: getDateTimeType(), nullable: true })
   eventEndDate?: Date;
 
   @Column({ type: "varchar", length: 255, nullable: true })
@@ -119,7 +119,7 @@ export class Product extends BaseModel {
   @Column({ type: "varchar", length: 255, nullable: true })
   eventOnlineUrl?: string;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   eventLocation?: {
     address: string;
     city: string;
@@ -157,7 +157,7 @@ export class Product extends BaseModel {
   isVisible!: boolean;
 
   // Media
-  @Column({ type: "jsonb", default: [] })
+  @Column({ type: getJsonType(), default: [] })
   images!: Array<{
     url: string;
     altText: string;

@@ -3,85 +3,92 @@ import HttpResponse, { type HttpResponseType } from "../common/HttpResponse";
 import type { ICreateProduct } from "../forms/products";
 
 export class ProductService {
-  async createProduct(productData: ICreateProduct): Promise<HttpResponseType> {
-    try {
-      // Generate slug from name
-      const slug = productData.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
+  
+  /**
+   * Creates a new product with a slug generated from the product name.
+   * If the status is not provided, defaults it to 'active'.
+   * @param productData - Data used to create the product
+   * @returns The created Product entity or an error response
+   */
+  async createProduct(
+    productData: ICreateProduct
+  ): Promise<Product> {
+    // Generate slug from name
+    const slug = productData.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
 
-      // Set default status if not provided
-      const product = Product.create({
-        ...productData,
-        slug,
-        status: productData.status || "active",
-      });
+    // Set default status if not provided
+    const product = Product.create({
+      ...productData,
+      slug,
+      status: productData.status || "active",
+    });
 
-      await product.save();
-      return HttpResponse.success("Product created successfully", product, 201);
-    } catch (error) {
-      console.log({ error });
-      return HttpResponse.failure("Failed to create product", 400);
-    }
+    await product.save();
+
+    return product;
   }
 
-  async getProductById(id: string): Promise<HttpResponseType> {
-    try {
-      const product = await Product.findOneBy({ id });
-      if (!product) {
-        return HttpResponse.notFound("Product not found");
-      }
-      return HttpResponse.success("Product retrieved successfully", product);
-    } catch (error) {
-      return HttpResponse.failure("Failed to retrieve product", 400);
-    }
-  }
-
-  async getAllProducts(): Promise<HttpResponseType> {
-    try {
-      const products = await Product.find();
-      return HttpResponse.success("Products retrieved successfully", products);
-    } catch (error) {
-      return HttpResponse.failure("Failed to retrieve products", 400);
-    }
-  }
-
+  /**
+   * Updates an existing product with the given partial product data.
+   * Returns a 404 response if the product is not found.
+   * @param id - ID of the product to update
+   * @param productData - Partial data to update the product
+   * @returns The updated Product entity or an error response
+   */
   async updateProduct(
-    id: string,
+    id: number,
     productData: Partial<ICreateProduct>
-  ): Promise<HttpResponseType> {
-    try {
-      const product = await Product.findOneBy({ id });
-      if (!product) {
-        return HttpResponse.notFound("Product not found");
-      }
-      Object.assign(product, productData);
-      await product.save();
-      return HttpResponse.success("Product updated successfully", product);
-    } catch (error) {
-      return HttpResponse.failure("Failed to update product", 400);
+  ): Promise<Product> {
+    const product = await Product.findOne({
+      where: { id },
+    });
+
+    if (!product) {
+      throw HttpResponse.notFound("Product not found");
     }
+
+    product.name = productData.name ?? product.name;
+    product.description = productData.description ?? product.description;
+    product.type = productData.type ?? product.type;
+    product.price = productData.price ?? product.price;
+    product.status = productData.status ?? product.status;
+    product.currency = productData.currency ?? product.currency;
+
+    await product.save();
+
+    return product;
   }
 
-  async deleteProduct(id: string): Promise<HttpResponseType> {
-    try {
-      const result = await Product.delete(id);
-      if (result.affected === 0) {
-        return HttpResponse.notFound("Product not found");
-      }
-      return HttpResponse.success("Product deleted successfully");
-    } catch (error) {
-      return HttpResponse.failure("Failed to delete product", 400);
-    }
+  /**
+   * Deletes a product by its ID.
+   * Returns true if deletion was successful or a 404 response if not found.
+   * @param id - ID of the product to delete
+   * @returns Boolean indicating success or an error response
+   */
+  async deleteProduct(id: number): Promise<boolean | HttpResponseType> {
+    const result = await Product.delete(id);
+
+    return result.affected! > 0
+      ? true
+      : HttpResponse.notFound("Product not found");
   }
 
+  /**
+   * Adjusts the inventory count of a product.
+   * Adds the given count to the existing inventory count.
+   * Returns a 404 response if the product is not found.
+   * @param productId - ID of the product to adjust inventory for
+   * @param count - Number to add (or subtract if negative) from inventory
+   * @returns The updated Product entity or an error response
+   */
   async adjustInventory(
-    productId: string,
+    productId: number,
     count: number
-  ): Promise<HttpResponseType> {
-    try {
-      const product = await Product.findOneBy({ id: productId });
+  ): Promise<Product | HttpResponseType> {
+      const product = await Product.findOne({ where: { id: productId } });
       if (!product) {
         return HttpResponse.notFound("Product not found");
       }
@@ -89,38 +96,6 @@ export class ProductService {
       product.inventoryCount = (product.inventoryCount || 0) + count;
       await product.save();
 
-      return HttpResponse.success("Inventory adjusted successfully", product);
-    } catch (error) {
-      return HttpResponse.failure("Failed to adjust inventory", 400);
+      return product;
     }
-  }
-
-  async checkAvailability(productId: string): Promise<HttpResponseType> {
-    try {
-      const product = await Product.findOneBy({ id: productId });
-      if (!product) {
-        return HttpResponse.notFound("Product not found");
-      }
-
-      return HttpResponse.success("Product availability checked", {
-        productId: product.id,
-        available:
-          product.inventoryCount !== undefined && product.inventoryCount > 0,
-      });
-    } catch (error) {
-      return HttpResponse.failure("Failed to check availability", 400);
-    }
-  }
-
-  async getProductTypes(): Promise<HttpResponseType> {
-    try {
-      const productTypes = Object.values(ProductType);
-      return HttpResponse.success(
-        "Product types retrieved successfully",
-        productTypes
-      );
-    } catch (error) {
-      return HttpResponse.failure("Failed to retrieve product types", 400);
-    }
-  }
 }

@@ -5,7 +5,7 @@ export interface Ticket {
   productId: number;
   variantId?: string;
   saleId?: number;
-  userId: string;
+  userId: number;
   ticketType: string;
   price: number;
   qrCode: string;

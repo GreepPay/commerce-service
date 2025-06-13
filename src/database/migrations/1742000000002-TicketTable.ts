@@ -32,8 +32,7 @@ export class TicketTable1742000000002 implements MigrationInterface {
           },
           {
             name: "userId",
-            type: "varchar",
-            length: "255",
+            type: "int",
             isNullable: false,
           },
           {

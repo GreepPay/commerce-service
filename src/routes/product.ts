@@ -7,45 +7,6 @@ const controller = new ProductController();
 /**
  * @swagger
  * /v1/products:
- *   get:
- *     summary: Get all products
- *     tags: [Products]
- *     parameters:
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *         description: Filter products by category
- *       - in: query
- *         name: type
- *         schema:
- *           type: string
- *         description: Filter products by type
- *     responses:
- *       200:
- *         description: List of products retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
- *       400:
- *         description: Invalid request
- */
-router.add("GET", `/${APP_VERSION}/products`, async (request: BunRequest) => {
-  const result = await controller.getAllProducts(request);
-  return result;
-});
-
-/**
- * @swagger
- * /v1/products:
  *   post:
  *     summary: Create a new product
  *     tags: [Products]
@@ -88,40 +49,11 @@ router.add("GET", `/${APP_VERSION}/products`, async (request: BunRequest) => {
  */
 router.add("POST", `/${APP_VERSION}/products`, async (request: BunRequest) => {
   const result = await controller.createProduct(request);
-  return result;
+  return new Response(JSON.stringify(result.body), {
+    headers: { "Content-Type": "application/json" },
+    status: result.statusCode,
+  });
 });
-
-/**
- * @swagger
- * /v1/products/{id}:
- *   get:
- *     summary: Get product by ID
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Product ID
- *     responses:
- *       200:
- *         description: Product retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Product'
- *       404:
- *         description: Product not found
- */
-router.add(
-  "GET",
-  `/${APP_VERSION}/products/:id`,
-  async (request: BunRequest) => {
-    const result = await controller.getProductById(request);
-    return result;
-  }
-);
 
 /**
  * @swagger
@@ -166,7 +98,10 @@ router.add(
   `/${APP_VERSION}/products/:id`,
   async (request: BunRequest) => {
     const result = await controller.updateProduct(request);
-    return result;
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 
@@ -194,7 +129,10 @@ router.add(
   `/${APP_VERSION}/products/:id`,
   async (request: BunRequest) => {
     const result = await controller.deleteProduct(request);
-    return result;
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 
@@ -230,79 +168,14 @@ router.add(
  *         description: Product not found
  */
 router.add(
-  "PATCH",
+  "PUT",
   `/${APP_VERSION}/products/:id/inventory`,
   async (request: BunRequest) => {
-    return controller.adjustInventory(request);
-  }
-);
-
-/**
- * @swagger
- * /v1/products/{id}/availability:
- *   get:
- *     summary: Check real-time availability
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Product ID
- *     responses:
- *       200:
- *         description: Product availability status
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 available:
- *                   type: boolean
- *                 inventoryCount:
- *                   type: number
- *                 nextRestockDate:
- *                   type: string
- *                   format: date-time
- *       404:
- *         description: Product not found
- */
-router.add(
-  "GET",
-  `/${APP_VERSION}/products/:id/availability`,
-  async (request: BunRequest) => {
-    return controller.checkAvailability(request);
-  }
-);
-
-/**
- * @swagger
- * /v1/product-types:
- *   get:
- *     summary: List supported product types
- *     tags: [Products]
- *     responses:
- *       200:
- *         description: List of product types
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     type: string
- *                     enum: [physical, digital, service]
- */
-router.add(
-  "GET",
-  `/${APP_VERSION}/product-types`,
-  async (request: BunRequest) => {
-    return controller.getProductTypes(request);
+    const result = await controller.adjustInventory(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 
