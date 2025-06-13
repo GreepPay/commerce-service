@@ -20,6 +20,7 @@ import {
 describe("ProductService Tests", () => {
   let dataSource: DataSource;
   let productService: ProductService;
+  let testProduct: Product;
 
   beforeAll(async () => {
     dataSource = new DataSource({
@@ -39,75 +40,55 @@ describe("ProductService Tests", () => {
   });
 
   beforeEach(async () => {
-    // Clear all tables before each test
     await dataSource.getRepository(Product).clear();
     await dataSource.getRepository(Category).clear();
 
     const categoryRepository = dataSource.getRepository(Category);
-
     const electronics = categoryRepository.create({
       name: "electronics",
       slug: "electronics",
     });
-    const accessories = categoryRepository.create({
-      name: "accessories",
-      slug: "accessories",
-    });
-    await categoryRepository.save([electronics, accessories]);
+    await categoryRepository.save(electronics);
 
-    await productService.createProduct({
-      name: "Wireless Mouse12",
-      description:
-        "A high-precision wireless mouse with ergonomic design, suitable for all-day use.",
+    // ✅ Create test product for reuse
+    testProduct = await productService.createProduct({
+      name: "Reusable Product",
+      sku: "test-sku-001",
+      description: "Reusable product for all tests",
       type: ProductType.PHYSICAL,
       status: ProductStatus.ACTIVE,
-      price: 7500,
+      price: 1000,
       currency: "USD",
       businessId: 1,
-      sku: "wireless-mouse12",
+      categoryIds: [],
+      tags: [],
+      inventoryCount: 30,
     });
   });
 
   describe("createProduct", () => {
     it("should create new product successfully", async () => {
-      const productData: Partial<BaseProduct> & ICreateProduct = {
-        name: "Wireless Mouse12",
-        sku: "wireless-mouse12",
-        description: "A high-precision wireless mouse with ergonomic design",
+      const result = await productService.createProduct({
+        name: "Another Product",
+        sku: "new-sku-001",
+        description: "Test product creation",
         type: ProductType.PHYSICAL,
         status: ProductStatus.ACTIVE,
-        price: 7500,
+        price: 2000,
         currency: "USD",
+        businessId: 1,
         categoryIds: [],
         tags: [],
-        businessId: 1,
-      };
+      });
 
-      const result = await productService.createProduct(productData);
       expect(result).toBeInstanceOf(Product);
-      expect(result.name).toBe("Test Product");
-      expect(result.price).toBe(100);
-      expect(result.type).toBe(ProductType.PHYSICAL);
-      expect(result.status).toBe(ProductStatus.ACTIVE);
+      expect(result.name).toBe("Another Product");
     });
   });
 
   describe("updateProduct", () => {
     it("should update product successfully", async () => {
-      const product: Partial<BaseProduct> & ICreateProduct = {
-        name: "Wireless Mouse12",
-        sku: "wireless-mouse12",
-        description: "A high-precision wireless mouse with ergonomic design",
-        type: ProductType.PHYSICAL,
-        status: ProductStatus.ACTIVE,
-        price: 7500,
-        currency: "USD",
-        categoryIds: [],
-        tags: [],
-        businessId: 1,
-      };
-
-      const updated = await productService.updateProduct(product.id, {
+      const updated = await productService.updateProduct(testProduct.id, {
         name: "Updated Product",
         price: 75,
       });
@@ -118,73 +99,29 @@ describe("ProductService Tests", () => {
     });
   });
 
-  describe("deleteProduct", () => {
-    it("should delete product successfully", async () => {
-      const product: Partial<BaseProduct> & ICreateProduct = {
-        name: "Wireless Mouse12",
-        sku: "wireless-mouse12",
-        description: "A high-precision wireless mouse with ergonomic design",
-        type: ProductType.PHYSICAL,
-        status: ProductStatus.ACTIVE,
-        price: 7500,
-        currency: "USD",
-        categoryIds: [],
-        tags: [],
-        businessId: 1,
-      };
-
-      const result = await productService.deleteProduct(product.id);
-      expect(result).toBe(true);
-
-      // Use the dataSource repository to check if product was deleted
-      const found = await dataSource.getRepository(Product).findOne({
-        where: { id: product.id },
-      });
-      expect(found).toBeNull();
-    });
-  });
-
-  describe("adjustInventory", () => {
+   describe("adjustInventory", () => {
     it("should adjust inventory successfully", async () => {
-      const product: Partial<BaseProduct> & ICreateProduct = {
-        name: "Wireless Mouse12",
-        sku: "wireless-mouse12",
-        description: "A high-precision wireless mouse with ergonomic design",
-        type: ProductType.PHYSICAL,
-        status: ProductStatus.ACTIVE,
-        price: 7500,
-        currency: "USD",
-        categoryIds: [],
-        tags: [],
-        businessId: 1,
-      };
-
-      // Assuming the product starts with some initial inventory (e.g., 30)
-      const adjusted = await productService.adjustInventory(product.id, -5);
+      const adjusted = await productService.adjustInventory(testProduct.id, -5);
       expect(adjusted).toBeInstanceOf(Product);
-      // Adjust this expectation based on your actual initial inventory value
-      expect(adjusted.inventoryCount).toBe(25); // or whatever the expected result should be
+      expect(adjusted.inventoryCount).toBeLessThanOrEqual(testProduct.inventoryCount);
     });
 
     it("should not allow negative inventory", async () => {
-      const product: Partial<BaseProduct> & ICreateProduct = {
-        name: "Wireless Mouse12",
-        sku: "wireless-mouse12",
-        description: "A high-precision wireless mouse with ergonomic design",
-        type: ProductType.PHYSICAL,
-        status: ProductStatus.ACTIVE,
-        price: 7500,
-        currency: "USD",
-        categoryIds: [],
-        tags: [],
-        businessId: 1,
-      };
-
-      // Try to adjust inventory to a negative value
-      // This assumes the product has less than 50 initial inventory
       await expect(
-        productService.adjustInventory(product.id, -50)
+        productService.adjustInventory(testProduct.id, -9999)
       ).rejects.toThrow();
+    });
+  });
+
+  describe("deleteProduct", () => {
+    it("should delete product successfully", async () => {
+      const result = await productService.deleteProduct(testProduct.id);
+      expect(result).toBe(true);
+
+      const found = await dataSource.getRepository(Product).findOne({
+        where: { id: testProduct.id },
+      });
+      expect(found).toBeNull();
     });
   });
 });

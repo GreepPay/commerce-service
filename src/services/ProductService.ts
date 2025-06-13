@@ -3,16 +3,13 @@ import HttpResponse, { type HttpResponseType } from "../common/HttpResponse";
 import type { ICreateProduct } from "../forms/products";
 
 export class ProductService {
-  
   /**
    * Creates a new product with a slug generated from the product name.
    * If the status is not provided, defaults it to 'active'.
    * @param productData - Data used to create the product
    * @returns The created Product entity or an error response
    */
-  async createProduct(
-    productData: ICreateProduct
-  ): Promise<Product> {
+  async createProduct(productData: ICreateProduct): Promise<Product> {
     // Generate slug from name
     const slug = productData.name
       .toLowerCase()
@@ -84,18 +81,20 @@ export class ProductService {
    * @param count - Number to add (or subtract if negative) from inventory
    * @returns The updated Product entity or an error response
    */
-  async adjustInventory(
-    productId: number,
-    count: number
-  ): Promise<Product | HttpResponseType> {
-      const product = await Product.findOne({ where: { id: productId } });
-      if (!product) {
-        return HttpResponse.notFound("Product not found");
-      }
-
-      product.inventoryCount = (product.inventoryCount || 0) + count;
-      await product.save();
-
-      return product;
+  async adjustInventory(productId: number, count: number): Promise<Product> {
+    const product = await Product.findOne({ where: { id: productId } });
+    if (!product) {
+      throw new Error("Product not found");
     }
+
+    const newCount = (product.inventoryCount || 0) + count;
+    if (newCount < 0) {
+      throw new Error("Insufficient inventory");
+    }
+
+    product.inventoryCount = newCount;
+    await product.save();
+
+    return product;
+  }
 }
