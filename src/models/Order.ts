@@ -1,12 +1,12 @@
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from "typeorm";
-import { BaseModel } from "./BaseModel";
+import { BaseModel, getEnumType, getJsonType } from "./BaseModel";
 import { Customer } from "./Customer";
-import type { Customer as Customertype} from "./Customer";
+import type { Customer as Customertype } from "./Customer";
 import { Product } from "./Product";
 import { Delivery } from "./Delivery";
-import type { Delivery as Deliverytype} from "./Delivery";
+import type { Delivery as Deliverytype } from "./Delivery";
 import { Sale } from "./Sale";
-import type { Sale as Saletype} from "./Sale";
+import type { Sale as Saletype } from "./Sale";
 
 export enum OrderStatus {
   PENDING = "pending",
@@ -32,15 +32,14 @@ export class Order extends BaseModel {
   @Column({ type: "varchar", length: 255 })
   orderNumber!: string;
 
-  @ManyToOne(() => Customer)
-  @JoinColumn()
-  customer!: Customertype;
+  @Column()
+  customerId!: number;
 
   @ManyToOne(() => Sale)
   @JoinColumn()
   sale!: Saletype;
 
-  @Column({ type: "jsonb" })
+  @Column({ type: getJsonType() })
   items!: Array<{
     product: Product;
     quantity: number;
@@ -67,7 +66,7 @@ export class Order extends BaseModel {
   currency!: string;
 
   @Column({
-    type: "enum",
+    type: getEnumType(),
     enum: OrderStatus,
     default: OrderStatus.PENDING,
   })
@@ -83,13 +82,13 @@ export class Order extends BaseModel {
   paymentMethod?: string;
 
   @Column({
-    type: "enum",
+    type: getEnumType(),
     enum: PaymentStatus,
     default: PaymentStatus.PENDING,
   })
   paymentStatus!: PaymentStatus;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   paymentDetails?: {
     transactionId: string;
     provider: string;
@@ -100,7 +99,7 @@ export class Order extends BaseModel {
     timestamp: Date;
   };
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   appliedDiscounts?: Array<{
     code: string;
     type: "percentage" | "fixed_amount";
@@ -108,7 +107,7 @@ export class Order extends BaseModel {
     description: string;
   }>;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   taxDetails?: Array<{
     type: string;
     rate: number;
@@ -116,7 +115,7 @@ export class Order extends BaseModel {
     description: string;
   }>;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   refundDetails?: {
     transactionId: string;
     amount: number;
@@ -128,7 +127,7 @@ export class Order extends BaseModel {
   @OneToMany(() => Delivery, (delivery) => delivery.order)
   deliveries!: Deliverytype[];
 
-  @Column({ type: "jsonb" })
+  @Column({ type: getJsonType() })
   statusHistory!: Array<{
     status: OrderStatus;
     timestamp: Date;

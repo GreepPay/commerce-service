@@ -71,7 +71,11 @@ const controller = new OrderController();
  *         description: Invalid request or validation error
  */
 router.add("POST", `/${APP_VERSION}/orders`, async (request: BunRequest) => {
-  return controller.createOrder(request);
+  const result = await controller.createOrder(request);
+  return new Response(JSON.stringify(result.body), {
+    headers: { "Content-Type": "application/json" },
+    status: result.statusCode,
+  });
 });
 
 /**

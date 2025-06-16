@@ -1,7 +1,5 @@
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
-import { BaseModel } from "./BaseModel";
-import { Customer } from "./Customer";
-import type { Customer as Customertype} from "./Customer";
+import { BaseModel, getEnumType, getJsonType } from "./BaseModel";
 
 export enum SaleStatus {
   PENDING = "pending",
@@ -24,12 +22,12 @@ export class Sale extends BaseModel {
   @Column({ type: "varchar", length: 255 })
   transactionId!: string;
 
-  @ManyToOne(() => Customer)
-  @JoinColumn()
-  customer!: Customertype;
+  // @ManyToOne(() => Customer)
+  // @JoinColumn()
+  // customer!: Customertype;
 
-  @Column({ type: "uuid" })
-  customerId!: string;
+  @Column()
+  customerId!: number;
 
   @Column({ type: "decimal", precision: 10, scale: 2 })
   subtotalAmount!: number;
@@ -47,13 +45,13 @@ export class Sale extends BaseModel {
   currency!: string;
 
   @Column({
-    type: "enum",
+    type: getEnumType(),
     enum: SaleStatus,
     default: SaleStatus.PENDING,
   })
   status!: SaleStatus;
 
-  @Column({ type: "jsonb" })
+  @Column({ type: getJsonType() })
   items!: Array<{
     productId: string;
     sku: string;
@@ -68,7 +66,7 @@ export class Sale extends BaseModel {
     total: number;
   }>;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   appliedDiscounts?: Array<{
     code: string;
     type: "percentage" | "fixed_amount";
@@ -76,7 +74,7 @@ export class Sale extends BaseModel {
     description: string;
   }>;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   taxDetails?: Array<{
     type: string;
     rate: number;
@@ -84,7 +82,7 @@ export class Sale extends BaseModel {
     description: string;
   }>;
 
-  @Column({ type: "jsonb" })
+  @Column({ type: getJsonType() })
   paymentDetails!: {
     method: PaymentMethod;
     transactionDate: Date;
@@ -93,7 +91,7 @@ export class Sale extends BaseModel {
     receiptNumber?: string;
   };
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   refundDetails?: Array<{
     transactionId: string;
     amount: number;
@@ -103,6 +101,6 @@ export class Sale extends BaseModel {
     notes?: string;
   }>;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   metadata?: Record<string, any>;
 }

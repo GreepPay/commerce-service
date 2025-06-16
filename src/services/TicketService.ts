@@ -35,7 +35,7 @@ export class TicketService {
     const productMap = new Map(products.map((p) => [p.id, p]));
 
     const ticketCreations = sale.items.flatMap((item) => {
-      const product = productMap.get(item.productId);
+      const product = productMap.get(parseInt(item.productId));
       if (!product || product.type !== ProductType.EVENT) return [];
 
       const variantLabel = item.name.split(" - ")[1] || "Regular";

@@ -1,5 +1,5 @@
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
-import { BaseModel } from "./BaseModel";
+import { BaseModel, getDateTimeType, getJsonType } from "./BaseModel";
 import type { Order as Ordertype} from "./Order";
 import { Order } from "./Order";
 
@@ -15,26 +15,26 @@ export class Delivery extends BaseModel {
   @Column({ type: "varchar", length: 50 })
   status!: string; // e.g., pending, shipped, delivered, failed
 
-  @Column({ type: "timestamp" })
+  @Column({ type: getDateTimeType() })
   estimatedDeliveryDate!: Date;
 
-  @Column({ type: "timestamp", nullable: true })
+  @Column({ type: getDateTimeType(), nullable: true })
   actualDeliveryDate?: Date;
 
   @Column({ type: "varchar", length: 255 })
   deliveryAddress!: string;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   metadata?: Record<string, any>;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   trackingUpdates?: Array<{
     timestamp: Date;
     status: string;
     location?: string;
   }>;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   deliveryAttempts?: Array<{
     attemptDate: Date;
     status: string;
