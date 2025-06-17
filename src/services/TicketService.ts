@@ -51,7 +51,7 @@ export class TicketService {
             variantId: item.variantId || undefined,
             ticketType: variantLabel,
             price: item.unitPrice,
-            status: TicketStatus.PENDING,
+            status: TicketStatus.ACTIVE,
           })
         )
       );
