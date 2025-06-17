@@ -45,3 +45,17 @@ export interface TrackingEvent {
   description: string;
   carrierCode?: string; // Original carrier status code
 }
+
+export interface CreateDelivery {
+  metadata: any;
+  deliveryAddress: any;
+  orderId: string;
+  carrier: Carrier;
+  trackingNumber: string;
+  status: DeliveryStatus;
+  estimatedDeliveryDate: Date;
+  actualDelivery?: Date;
+  deliveryAttempts: number;
+  trackingUpdates: TrackingEvent[];
+  recipientSignature?: string;
+}

@@ -1,60 +1,60 @@
 import { Delivery } from "../models/Delivery";
-import HttpResponse, { type HttpResponseType } from "../common/HttpResponse";
+import { Order } from "../models/Order";
+import type { CreateDelivery } from "../forms/delivery";
 
 export class DeliveryService {
-
-  async createDelivery(deliveryData: any): Promise<Delivery> {
-    
+  async createDelivery(deliveryData: CreateDelivery): Promise<Delivery> {
     const delivery = new Delivery();
 
-    Object.assign(delivery, deliveryData);
+    const order = await Order.findOneByOrFail({
+      id: parseInt(deliveryData.orderId),
+    });
+    delivery.order = order;
+
+    Object.assign(delivery, {
+      trackingNumber: deliveryData.trackingNumber,
+      status: deliveryData.status,
+      estimatedDeliveryDate: deliveryData.estimatedDeliveryDate,
+      deliveryAddress: deliveryData.deliveryAddress,
+      metadata: deliveryData.metadata,
+      trackingUpdates: deliveryData.trackingUpdates,
+      deliveryAttempts: deliveryData.deliveryAttempts,
+    });
 
     await delivery.save();
-
     return delivery;
   }
 
   async updateDeliveryStatus(
     deliveryId: string,
     status: string
-  ): Promise<HttpResponseType> {
-    try {
-      const delivery = await Delivery.findOneBy({ id: deliveryId });
-      if (!delivery) {
-        return HttpResponse.notFound("Delivery not found");
-      }
-
-      delivery.status = status;
-      await delivery.save();
-      return HttpResponse.success(
-        "Delivery status updated successfully",
-        delivery
-      );
-    } catch (error) {
-      return HttpResponse.failure("Failed to update delivery status", 400);
+  ): Promise<Delivery> {
+    const delivery = await Delivery.findOneBy({ id: parseInt(deliveryId) });
+    if (!delivery) {
+      throw { status: 404, message: "Delivery not found" };
     }
+
+    delivery.status = status;
+    await delivery.save();
+    return delivery;
   }
 
   async updateTrackingInformation(
     deliveryId: string,
     trackingInfo: any
-  ): Promise<HttpResponseType> {
-    try {
-      const delivery = await Delivery.findOneBy({ id: deliveryId });
-      if (!delivery) {
-        return HttpResponse.notFound("Delivery not found");
-      }
-
-      delivery.trackingUpdates = delivery.trackingUpdates || [];
-      delivery.trackingUpdates.push(trackingInfo);
-      await delivery.save();
-
-      return HttpResponse.success(
-        "Tracking information updated successfully",
-        delivery
-      );
-    } catch (error) {
-      return HttpResponse.failure("Failed to update tracking information", 400);
+  ): Promise<Delivery> {
+    const delivery = await Delivery.findOneBy({ id: parseInt(deliveryId) });
+    if (!delivery) {
+      throw { status: 404, message: "Delivery not found" };
     }
+
+    delivery.trackingUpdates = Array.isArray(delivery.trackingUpdates)
+      ? delivery.trackingUpdates
+      : [];
+
+    delivery.trackingUpdates.push(trackingInfo);
+    await delivery.save();
+
+    return delivery;
   }
 }

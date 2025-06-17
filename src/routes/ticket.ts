@@ -44,7 +44,11 @@ const ticketController = new TicketController();
  *         description: Invalid request
  */
 router.add("POST", `/${APP_VERSION}/tickets`, async (request: BunRequest) => {
-  return ticketController.createTicket(request);
+  const result = await ticketController.createTicket(request);
+  return new Response(JSON.stringify(result.body), {
+    headers: { "Content-Type": "application/json" },
+    status: result.statusCode,
+  });
 });
 
 /**
@@ -80,6 +84,15 @@ router.add("POST", `/${APP_VERSION}/tickets`, async (request: BunRequest) => {
  *       404:
  *         description: Ticket not found
  */
-router.add("PUT", `/${APP_VERSION}/tickets/:id`, async (request: BunRequest) => {
-  return ticketController.updateTicket(request);
-});
+
+router.add(
+  "PUT",
+  `/${APP_VERSION}/tickets/:id`,
+  async (request: BunRequest) => {
+    const result = await ticketController.updateTicket(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
+  }
+);

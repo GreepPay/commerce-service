@@ -1,6 +1,7 @@
 import { DeliveryService } from "../services/DeliveryService";
 import HttpResponse from "../common/HttpResponse";
 import type { BunRequest, Validation } from "../routes/router";
+import type { CreateDelivery, Delivery } from "../forms/delivery";
 
 export class DeliveryController {
   private deliveryService: DeliveryService;
@@ -19,13 +20,9 @@ export class DeliveryController {
         { field: "estimatedDeliveryDate", type: "string", required: false },
       ];
 
-      const deliveryData = (await request.validate(validations)) as {
-        orderId: number;
-        provider: string;
-        trackingNumber: string;
-        status: string;
-        estimatedDeliveryDate?: string;
-      };
+      const deliveryData = (await request.validate(
+        validations
+      )) as CreateDelivery;
 
       const result = await this.deliveryService.createDelivery(deliveryData);
 
@@ -38,28 +35,36 @@ export class DeliveryController {
     }
   }
 
-  async updateDeliveryStatus(request: BunRequest): Promise<Response> {
+  async updateDeliveryStatus(request: BunRequest) {
     try {
+      const validations: Validation[] = [
+        { field: "status", type: "string", required: true },
+      ];
+
       const { id } = request.params;
-      const { status } = (await request.json()) as { status: string }; // Ensure status is typed
+      const { status } = (await request.validate(validations)) as Pick<
+        CreateDelivery,
+        "status"
+      >;
+
       const result = await this.deliveryService.updateDeliveryStatus(
         id,
         status
       );
-      return new Response(JSON.stringify(result), {
-        status: result.statusCode,
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(
-          HttpResponse.failure("Failed to update delivery status", 400)
-        ),
-        { status: 400 }
+
+      return HttpResponse.success(
+        "Updated Delivery Status successfully",
+        result
+      );
+    } catch (error: any) {
+      return HttpResponse.failure(
+        error.message || "Failed to create delivery",
+        error.status || 500
       );
     }
   }
 
-  async updateTrackingInformation(request: BunRequest): Promise<Response> {
+  async updateTrackingInformation(request: BunRequest) {
     try {
       const { id } = request.params;
       const trackingInfo = await request.json();
@@ -67,15 +72,14 @@ export class DeliveryController {
         id,
         trackingInfo
       );
-      return new Response(JSON.stringify(result), {
-        status: result.statusCode,
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(
-          HttpResponse.failure("Failed to update tracking information", 400)
-        ),
-        { status: 400 }
+      return HttpResponse.success(
+        "Updated Tranking Infomation successfully",
+        result
+      );
+    } catch (error: any) {
+      return HttpResponse.failure(
+        error.message || "Failed to create delivery",
+        error.status || 500
       );
     }
   }

@@ -63,7 +63,11 @@ router.add(
   "POST",
   `/${APP_VERSION}/sales/process`,
   async (request: BunRequest) => {
-    return controller.processSale(request);
+    const result = await controller.processSale(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 
@@ -118,7 +122,11 @@ router.add(
   "POST",
   `/${APP_VERSION}/sales/:id/refund`,
   async (request: BunRequest) => {
-    return controller.processSaleRefund(request);
+    const result = await controller.processSaleRefund(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 
@@ -158,7 +166,11 @@ router.add(
   "POST",
   `/${APP_VERSION}/discounts/apply`,
   async (request: BunRequest) => {
-    return controller.validateDiscountCode(request);
+    const result = await controller.validateDiscountCode(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 
@@ -217,102 +229,11 @@ router.add(
   "POST",
   `/${APP_VERSION}/taxes/calculate`,
   async (request: BunRequest) => {
-    return controller.calculateTaxes(request);
-  }
-);
-
-/**
- * @swagger
- * /v1/sales:
- *   get:
- *     summary: List all sales (with date/customer filters)
- *     tags: [Sales]
- *     parameters:
- *       - in: query
- *         name: customerId
- *         schema:
- *           type: string
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [pending, completed, refunded, partially_refunded, cancelled]
- *       - in: query
- *         name: fromDate
- *         schema:
- *           type: string
- *           format: date-time
- *       - in: query
- *         name: toDate
- *         schema:
- *           type: string
- *           format: date-time
- *     responses:
- *       200:
- *         description: Sales retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Sale'
- */
-router.add("GET", `/${APP_VERSION}/sales`, async (request: BunRequest) => {
-  return controller.getSales(request);
-});
-
-/**
- * @swagger
- * /v1/customers/{id}/sales:
- *   get:
- *     summary: Fetch sales history for a customer
- *     tags: [Sales]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [pending, completed, refunded, partially_refunded, cancelled]
- *       - in: query
- *         name: fromDate
- *         schema:
- *           type: string
- *           format: date-time
- *       - in: query
- *         name: toDate
- *         schema:
- *           type: string
- *           format: date-time
- *     responses:
- *       200:
- *         description: Customer sales retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Sale'
- */
-router.add(
-  "GET",
-  `/${APP_VERSION}/customers/:id/sales`,
-  async (request: BunRequest) => {
-    return controller.getCustomerSales(request);
+    const result = await controller.calculateTaxes(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 

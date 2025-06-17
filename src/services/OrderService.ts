@@ -219,6 +219,7 @@ export class OrderService {
         });
 
         for (const item of order.items || []) {
+           if (!item.product) continue;
           const product = await Product.findOneBy({ id: item.product.id });
           if (product && typeof product.inventoryCount === "number") {
             product.inventoryCount += item.quantity;

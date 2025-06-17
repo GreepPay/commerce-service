@@ -64,40 +64,4 @@ export class SaleController {
       );
     }
   }
-
-  async getSales(request: BunRequest): Promise<Response> {
-    try {
-      const filters: SaleFilters = {
-        customerId: request.query.get('customerId') || undefined,
-        status: request.query.get('status') as SaleStatus | undefined,
-        fromDate: request.query.get('fromDate') ? new Date(request.query.get('fromDate') as unknown as string) : undefined,
-        toDate: request.query.get('toDate') ? new Date(request.query.get('toDate') as unknown as string) : undefined,
-      };
-      const result = await this.saleService.getSales(filters);
-      return new Response(JSON.stringify(result), { status: result.statusCode });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(HttpResponse.failure("Failed to retrieve sales", 400)),
-        { status: 400 }
-      );
-    }
-  }
-
-  async getCustomerSales(request: BunRequest): Promise<Response> {
-    try {
-      const { id: customerId } = request.params;
-      const filters: SaleFilters = {
-        status: request.query.get('status') as SaleStatus | undefined,
-        fromDate: request.query.get('fromDate') ? new Date(request.query.get('fromDate') as unknown as string) : undefined,
-        toDate: request.query.get('toDate') ? new Date(request.query.get('toDate') as unknown as string) : undefined,
-      };
-      const result = await this.saleService.getCustomerSales(customerId, filters);
-      return new Response(JSON.stringify(result), { status: result.statusCode });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(HttpResponse.failure("Failed to retrieve customer sales", 400)),
-        { status: 400 }
-      );
-    }
-  }
 }

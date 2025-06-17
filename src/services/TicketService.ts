@@ -1,5 +1,8 @@
 import { Ticket } from "../models/Ticket";
-import { type HttpResponseType, default as HttpResponse } from "../common/HttpResponse";
+import {
+  type HttpResponseType,
+  default as HttpResponse,
+} from "../common/HttpResponse";
 import { type ICreateTicket } from "../forms/tickets";
 import { TicketStatus } from "../models/Ticket";
 import type { Sale } from "../models/Sale";
@@ -7,25 +10,24 @@ import { In, type EntityManager } from "typeorm";
 import { Product, ProductType } from "../models/Product";
 
 export class TicketService {
-  async createTicket(ticketData: ICreateTicket): Promise<HttpResponseType> {
-    try {
-      const ticket = Ticket.create({
-        ...ticketData,
-        productId: Number(ticketData.productId),
-        saleId: ticketData.saleId ? Number(ticketData.saleId) : undefined,
-        status: ticketData.status || TicketStatus.ACTIVE
-      });
+  async createTicket(ticketData: ICreateTicket): Promise<Ticket> {
+    const ticket = Ticket.create({
+      product: { id: Number(ticketData.productId) } as any,
+      sale: ticketData.saleId
+        ? ({ id: Number(ticketData.saleId) } as any)
+        : undefined,
+      user: { id: Number(ticketData.userId) } as any,
+      variantId: ticketData.variantId,
+      ticketType: ticketData.ticketType,
+      price: ticketData.price,
+      status: ticketData.status || TicketStatus.ACTIVE,
+    });
 
-      await ticket.save();
-
-      return HttpResponse.success("Ticket created successfully", ticket, 201);
-    } catch (error) {
-      console.error("Create Ticket Error:", error);
-      return HttpResponse.failure("Failed to create ticket", 400);
-    }
+    await ticket.save();
+    return ticket;
   }
 
-    async createFromSale(
+  async createFromSale(
     sale: Sale,
     entityManager: EntityManager
   ): Promise<Ticket[]> {
@@ -61,19 +63,14 @@ export class TicketService {
   async updateTicket(
     id: string,
     ticketData: Partial<ICreateTicket>
-  ): Promise<HttpResponseType> {
-    try {
-      const ticket = await Ticket.findOneBy({ id: parseInt(id) });
-      if (!ticket) {
-        return HttpResponse.notFound("Ticket not found");
-      }
-
-      Object.assign(ticket, ticketData);
-      await ticket.save();
-
-      return HttpResponse.success("Ticket updated successfully", ticket);
-    } catch (error) {
-      return HttpResponse.failure("Failed to update ticket", 400);
+  ): Promise<Ticket> {
+    const ticket = await Ticket.findOneBy({ id: parseInt(id) });
+    if (!ticket) {
+      return HttpResponse.notFound("Ticket not found");
     }
+
+    Object.assign(ticket, ticketData);
+    await ticket.save();
+    return ticket;
   }
 }

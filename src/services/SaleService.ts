@@ -59,7 +59,7 @@ export class SaleService {
           });
 
           for (const item of items) {
-            const product = products.find((p) => p.id === item.productId);
+            const product = products.find((p) => p.id.toString() === item.productId);
             if (!product) continue;
 
             const variant = item.variantId
@@ -83,6 +83,7 @@ export class SaleService {
         }
       );
     } catch (error) {
+      console.log(error)
       return HttpResponse.failure("Failed to process sale", 400);
     }
   }
@@ -187,7 +188,7 @@ export class SaleService {
     }
 
     for (const item of items) {
-      const product = products.find((p) => p.id === item.productId);
+      const product = products.find((p) => p.id.toString() === item.productId);
       if (!product) {
         return {
           success: false,
@@ -229,7 +230,7 @@ export class SaleService {
 
   private calculateItemTotals(products: Product[], items: CartItem[]): SaleItem[] {
     return items.map((item) => {
-      const product = products.find((p) => p.id === item.productId)!;
+      const product = products.find((p) => p.id.toString() === item.productId)!;
       const variant = item.variantId
         ? product.variants?.find((v) => v.id === item.variantId)
         : undefined;
