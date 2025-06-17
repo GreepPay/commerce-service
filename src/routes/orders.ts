@@ -80,128 +80,6 @@ router.add("POST", `/${APP_VERSION}/orders`, async (request: BunRequest) => {
 
 /**
  * @swagger
- * /v1/orders:
- *   get:
- *     summary: Get all orders
- *     tags: [Orders]
- *     parameters:
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [pending, confirmed, processing, shipped, delivered, cancelled, refunded]
- *       - in: query
- *         name: fromDate
- *         schema:
- *           type: string
- *           format: date-time
- *       - in: query
- *         name: toDate
- *         schema:
- *           type: string
- *           format: date-time
- *     responses:
- *       200:
- *         description: List of orders retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Order'
- */
-router.add("GET", `/${APP_VERSION}/orders`, async (request: BunRequest) => {
-  return controller.getAllOrders(request);
-});
-
-/**
- * @swagger
- * /v1/orders/{id}:
- *   get:
- *     summary: Get order by ID
- *     tags: [Orders]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Order retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   $ref: '#/components/schemas/Order'
- *       404:
- *         description: Order not found
- */
-router.add("GET", `/${APP_VERSION}/orders/:id`, async (request: BunRequest) => {
-  return controller.getOrderById(request);
-});
-
-/**
- * @swagger
- * /v1/customers/{id}/orders:
- *   get:
- *     summary: Get all orders for a customer
- *     tags: [Orders]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [pending, confirmed, processing, shipped, delivered, cancelled, refunded]
- *       - in: query
- *         name: fromDate
- *         schema:
- *           type: string
- *           format: date-time
- *       - in: query
- *         name: toDate
- *         schema:
- *           type: string
- *           format: date-time
- *     responses:
- *       200:
- *         description: Customer orders retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Order'
- */
-router.add(
-  "GET",
-  `/${APP_VERSION}/customers/:id/orders`,
-  async (request: BunRequest) => {
-    return controller.getCustomerOrders(request);
-  }
-);
-
-/**
- * @swagger
  * /v1/orders/{id}/status:
  *   patch:
  *     summary: Update order status
@@ -243,11 +121,16 @@ router.add(
  *       404:
  *         description: Order not found
  */
+
 router.add(
-  "PATCH",
+  "PUT",
   `/${APP_VERSION}/orders/:id/status`,
   async (request: BunRequest) => {
-    return controller.updateOrderStatus(request);
+    const result = await controller.updateOrderStatus(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 
@@ -292,11 +175,16 @@ router.add(
  *       404:
  *         description: Order not found
  */
+
 router.add(
   "POST",
   `/${APP_VERSION}/orders/:id/cancel`,
   async (request: BunRequest) => {
-    return controller.cancelOrder(request);
+    const result = await controller.updateOrderStatus(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 

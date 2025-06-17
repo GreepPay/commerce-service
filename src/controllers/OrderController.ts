@@ -10,11 +10,13 @@ import { TicketService } from "../services/TicketService";
 interface CreateOrderRequest extends Order {}
 
 interface UpdateOrderStatusRequest {
+  id: string;
   status: OrderStatus;
   note?: string;
 }
 
 interface CancelOrderRequest {
+  id: string;
   reason: string;
 }
 
@@ -99,7 +101,7 @@ export class OrderController {
   async createOrder(request: BunRequest) {
     try {
       const baseValidations: Validation[] = [
-        { field: "customerId", type: "string", required: true },
+        { field: "customerId", type: "number", required: true },
         { field: "items", type: "array", required: true },
       ];
 
@@ -149,162 +151,58 @@ export class OrderController {
     }
   }
 
-  async getOrderById(request: BunRequest): Promise<Response> {
+  async updateOrderStatus(request: BunRequest) {
     try {
-      const { id } = request.params;
-      const result = await this.orderService.getOrderById(id);
-      return new Response(JSON.stringify(result), {
-        status: result.statusCode,
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(HttpResponse.failure("Failed to retrieve order", 400)),
-        { status: 400 }
-      );
-    }
-  }
+      const validations: Validation[] = [
+        { field: "id", type: "string", required: true },
+        { field: "status", type: "string", required: true },
+        { field: "note", type: "string", required: false },
+      ];
 
-  async getCustomerOrders(request: BunRequest): Promise<Response> {
-    try {
-      const { id: customerId } = request.params;
-      const queryParams = new URLSearchParams(request.url.split("?")[1] || "");
+      const { id, status, note } = (await request.validate(
+        validations
+      )) as UpdateOrderStatusRequest;
 
-      const filters: {
-        status?: OrderStatus;
-        fromDate?: Date;
-        toDate?: Date;
-      } = {};
-
-      const status = queryParams.get("status");
-      const fromDate = queryParams.get("fromDate");
-      const toDate = queryParams.get("toDate");
-
-      if (
-        status &&
-        Object.values(OrderStatus).includes(status as OrderStatus)
-      ) {
-        filters.status = status as OrderStatus;
-      }
-      if (fromDate) {
-        filters.fromDate = new Date(fromDate);
-      }
-      if (toDate) {
-        filters.toDate = new Date(toDate);
+      if (!Object.values(OrderStatus).includes(status)) {
+        return HttpResponse.failure("Invalid order status", 422);
       }
 
-      const result = await this.orderService.getCustomerOrders(
-        customerId,
-        filters
-      );
-      return new Response(JSON.stringify(result), {
-        status: result.statusCode,
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(
-          HttpResponse.failure("Failed to retrieve customer orders", 400)
-        ),
-        { status: 400 }
-      );
-    }
-  }
-
-  async updateOrderStatus(request: BunRequest): Promise<Response> {
-    try {
-      const { id } = request.params;
-      const { status, note } =
-        (await request.json()) as UpdateOrderStatusRequest;
-
-      if (!status || !Object.values(OrderStatus).includes(status)) {
-        return new Response(
-          JSON.stringify(
-            HttpResponse.validationFail({ status: "Invalid order status" })
-          ),
-          { status: 422 }
-        );
-      }
-
-      const result = await this.orderService.updateOrderStatus(
-        id,
+      const updatedOrder = await this.orderService.updateOrderStatus(
+        parseInt(id),
         status,
         note
       );
-      return new Response(JSON.stringify(result), {
-        status: result.statusCode,
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(
-          HttpResponse.failure("Failed to update order status", 400)
-        ),
-        { status: 400 }
+
+      return HttpResponse.success(
+        "Order status updated successfully",
+        updatedOrder
+      );
+    } catch (error: any) {
+      return HttpResponse.failure(
+        error.message || "Failed to update order status",
+        error.status || 500
       );
     }
   }
 
-  async getAllOrders(request: BunRequest): Promise<Response> {
+  async cancelOrder(request: BunRequest) {
     try {
-      const queryParams = new URLSearchParams(request.url.split("?")[1] || "");
+      const validations: Validation[] = [
+        { field: "id", type: "string", required: true },
+        { field: "reason", type: "string", required: true },
+      ];
 
-      const filters: {
-        status?: OrderStatus;
-        fromDate?: Date;
-        toDate?: Date;
-      } = {};
+      const { id, reason } = (await request.validate(
+        validations
+      )) as CancelOrderRequest;
 
-      const status = queryParams.get("status");
-      const fromDate = queryParams.get("fromDate");
-      const toDate = queryParams.get("toDate");
+      const result = await this.orderService.cancelOrder(parseInt(id), reason);
 
-      if (
-        status &&
-        Object.values(OrderStatus).includes(status as OrderStatus)
-      ) {
-        filters.status = status as OrderStatus;
-      }
-      if (fromDate) {
-        filters.fromDate = new Date(fromDate);
-      }
-      if (toDate) {
-        filters.toDate = new Date(toDate);
-      }
-
-      const result = await this.orderService.getAllOrders(filters);
-      return new Response(JSON.stringify(result), {
-        status: result.statusCode,
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(HttpResponse.failure("Failed to retrieve orders", 400)),
-        { status: 400 }
-      );
-    }
-  }
-
-  async cancelOrder(request: BunRequest): Promise<Response> {
-    try {
-      const { id } = request.params;
-      const { reason } = (await request.json()) as CancelOrderRequest;
-
-      if (!reason) {
-        return new Response(
-          JSON.stringify(
-            HttpResponse.validationFail({
-              reason: "Cancellation reason is required",
-            })
-          ),
-          { status: 422 }
-        );
-      }
-
-      const result = await this.orderService.cancelOrder(id, reason);
-      return new Response(JSON.stringify(result), {
-        status: result.statusCode,
-      });
-    } catch (error) {
-      return new Response(
-        JSON.stringify(HttpResponse.failure("Failed to cancel order", 400)),
-        { status: 400 }
+      return HttpResponse.success("Order successfully cancelled", result);
+    } catch (error: any) {
+      return HttpResponse.failure(
+        error.message || "Failed to cancel order",
+        error.status || 500
       );
     }
   }

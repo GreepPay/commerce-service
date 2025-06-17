@@ -50,11 +50,16 @@ const controller = new DeliveryController();
  *       400:
  *         description: Invalid request
  */
+
 router.add(
   "POST",
   `/${APP_VERSION}/deliveries`,
   async (request: BunRequest) => {
-    return controller.createDelivery(request);
+    const result = await controller.createDelivery(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 
@@ -97,81 +102,16 @@ router.add(
  *       404:
  *         description: Delivery not found
  */
+
 router.add(
-  "PATCH",
+  "PUT",
   `/${APP_VERSION}/deliveries/:id/status`,
   async (request: BunRequest) => {
-    return controller.updateDeliveryStatus(request);
-  }
-);
-
-/**
- * @swagger
- * /v1/deliveries/{id}:
- *   get:
- *     summary: Get delivery details
- *     tags: [Deliveries]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Delivery details retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   $ref: '#/components/schemas/Delivery'
- *       404:
- *         description: Delivery not found
- */
-router.add(
-  "GET",
-  `/${APP_VERSION}/deliveries/:id`,
-  async (request: BunRequest) => {
-    return controller.getDeliveryDetails(request);
-  }
-);
-
-/**
- * @swagger
- * /v1/orders/{id}/deliveries:
- *   get:
- *     summary: Get all deliveries for an order
- *     tags: [Deliveries]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Order deliveries retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Delivery'
- */
-router.add(
-  "GET",
-  `/${APP_VERSION}/orders/:id/deliveries`,
-  async (request: BunRequest) => {
-    return controller.getOrderDeliveries(request);
+    const result = await controller.updateDeliveryStatus(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 
@@ -227,7 +167,11 @@ router.add(
   "POST",
   `/${APP_VERSION}/deliveries/:id/tracking`,
   async (request: BunRequest) => {
-    return controller.updateTrackingInformation(request);
+    const result = await controller.updateDeliveryStatus(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 

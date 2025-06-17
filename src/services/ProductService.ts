@@ -1,5 +1,4 @@
-import { Product, ProductType } from "../models/Product";
-import HttpResponse, { type HttpResponseType } from "../common/HttpResponse";
+import { Product } from "../models/Product";
 import type { ICreateProduct } from "../forms/products";
 
 export class ProductService {
@@ -44,7 +43,10 @@ export class ProductService {
     });
 
     if (!product) {
-      throw HttpResponse.notFound("Product not found");
+      throw {
+        status: 404,
+        message: "Product not found",
+      };
     }
 
     product.name = productData.name ?? product.name;
@@ -61,16 +63,21 @@ export class ProductService {
 
   /**
    * Deletes a product by its ID.
-   * Returns true if deletion was successful or a 404 response if not found.
+   * Returns true if deletion was successful or throws a 404 error if not found.
    * @param id - ID of the product to delete
-   * @returns Boolean indicating success or an error response
+   * @returns Boolean indicating success
    */
-  async deleteProduct(id: number): Promise<boolean | HttpResponseType> {
+  async deleteProduct(id: number): Promise<boolean> {
     const result = await Product.delete(id);
 
-    return result.affected! > 0
-      ? true
-      : HttpResponse.notFound("Product not found");
+    if (result.affected && result.affected > 0) {
+      return true;
+    }
+
+    throw {
+      status: 404,
+      message: "Product not found",
+    };
   }
 
   /**
@@ -84,12 +91,18 @@ export class ProductService {
   async adjustInventory(productId: number, count: number): Promise<Product> {
     const product = await Product.findOne({ where: { id: productId } });
     if (!product) {
-      throw new Error("Product not found");
+      throw {
+        status: 404,
+        message: "Product not found",
+      };
     }
 
     const newCount = (product.inventoryCount || 0) + count;
     if (newCount < 0) {
-      throw new Error("Insufficient inventory");
+      throw {
+        status: 400,
+        message: "Insufficient inventory",
+      };
     }
 
     product.inventoryCount = newCount;
