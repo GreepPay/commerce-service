@@ -1,244 +1,182 @@
+import { BillingInterval, EventType, ProductStatus, ProductType, ShippingClass } from "../../forms/products";
 import type { Validation } from "../../routes/router";
 
-// Enhanced Validation type to support dynamic validation
-interface DynamicValidation extends Validation {
-  validator?: (data: any, fieldValue: any) => boolean | string;
-  conditional?: (data: any) => boolean;
-}
 
-export function getDynamicProductSchema(): DynamicValidation[] {
-  return [
-    // Base validations
-    { field: "name", type: "string", required: true },
-    { field: "description", type: "string", required: true },
-    { field: "type", type: "string", required: true },
-    { field: "price", type: "number", required: true },
-    { field: "status", type: "string", required: false },
-    { field: "currency", type: "string", required: true },
-    { field: "categoryIds", type: "array", required: false },
-    { field: "tags", type: "array", required: false },
+export const baseProductFields: Validation[] = [
+  { field: "name", type: "string", required: true },
+  { field: "description", type: "string", required: true },
+  {
+    field: "type",
+    type: "string",
+    required: true,
+    allowed: Object.values(ProductType),
+  },
+  { field: "price", type: "number", required: true },
+  {
+    field: "status",
+    type: "string",
+    required: false,
+    allowed: Object.values(ProductStatus),
+  },
+  { field: "currency", type: "string", required: true },
+  {
+    field: "categoryIds",
+    type: "array",
+    required: false,
+    children: [{ field: "", type: "string" }],
+  },
+  {
+    field: "tags",
+    type: "array",
+    required: false,
+    children: [{ field: "", type: "string" }],
+  },
+  {
+    field: "images",
+    type: "array",
+    required: false,
+    children: [{ field: "", type: "string" }],
+  },
+  { field: "businessId", type: "number", required: true },
+];
 
-    // Physical product fields (conditional on type)
-    {
-      field: "inventoryCount",
-      type: "number",
-      required: false,
-      conditional: (data) => data.type === "physical",
-      validator: (data, value) => {
-        if (data.type === "physical" && (value === undefined || value === null)) {
-          return "inventoryCount is required for physical products";
-        }
-        return true;
-      }
-    },
-    {
-      field: "weight",
-      type: "number",
-      required: false,
-      conditional: (data) => data.type === "physical",
-      validator: (data, value) => {
-        if (data.type === "physical" && (value === undefined || value === null)) {
-          return "weight is required for physical products";
-        }
-        return true;
-      }
-    },
-    {
-      field: "dimensions",
-      type: "object",
-      required: false,
-      conditional: (data) => data.type === "physical",
-      validator: (data, value) => {
-        if (data.type === "physical") {
-          if (!value) return "dimensions is required for physical products";
-          if (!value.length || !value.width || !value.height) {
-            return "dimensions must include length, width, and height";
-          }
-          if (typeof value.length !== "number" || typeof value.width !== "number" || typeof value.height !== "number") {
-            return "dimensions length, width, and height must be numbers";
-          }
-        }
-        return true;
-      }
-    },
+export const optionalTypeFields: Validation[] = [
+  // Physical
+  { field: "weight", type: "number", required: false },
+  {
+    field: "dimensions",
+    type: "object",
+    required: false,
+    children: [
+      { field: "length", type: "number", required: false },
+      { field: "width", type: "number", required: false },
+      { field: "height", type: "number", required: false },
+    ],
+  },
+  {
+    field: "shippingClass",
+    type: "string",
+    required: false,
+    allowed: Object.values(ShippingClass),
+  },
+  {
+    field: "inventory",
+    type: "object",
+    required: false,
+    children: [
+      { field: "stock", type: "number", required: false },
+      { field: "lowStockThreshold", type: "number", required: false },
+      { field: "isBackorderAllowed", type: "boolean", required: false },
+    ],
+  },
 
-    // Digital product fields
-    {
-      field: "downloadUrl",
-      type: "string",
-      required: false,
-      conditional: (data) => data.type === "digital",
-      validator: (data, value) => {
-        if (data.type === "digital" && !value) {
-          return "downloadUrl is required for digital products";
-        }
-        return true;
-      }
-    },
-    {
-      field: "downloadLimit",
-      type: "number",
-      required: false,
-      conditional: (data) => data.type === "digital"
-    },
+  // Digital
+  {
+    field: "download",
+    type: "object",
+    required: false,
+    children: [
+      { field: "url", type: "string", required: false },
+      { field: "accessExpiration", type: "string", required: false },
+      { field: "downloadLimit", type: "number", required: false },
+    ],
+  },
+  {
+    field: "license",
+    type: "object",
+    required: false,
+    children: [
+      { field: "key", type: "string", required: false },
+      {
+        field: "type",
+        type: "string",
+        required: false,
+        allowed: Object.values(LicenseType),
+      },
+    ],
+  },
+  {
+    field: "fileInfo",
+    type: "object",
+    required: false,
+    children: [
+      { field: "size", type: "number", required: false },
+      { field: "format", type: "string", required: false },
+    ],
+  },
 
-    // Subscription product fields
-    {
-      field: "billingInterval",
-      type: "string",
-      required: false,
-      conditional: (data) => data.type === "subscription",
-      validator: (data, value) => {
-        if (data.type === "subscription" && !value) {
-          return "billingInterval is required for subscription products";
-        }
-        return true;
-      }
-    },
-    {
-      field: "trialPeriodDays",
-      type: "number",
-      required: false,
-      conditional: (data) => data.type === "subscription"
-    },
+  // Subscription
+  {
+    field: "billing",
+    type: "object",
+    required: false,
+    children: [
+      {
+        field: "interval",
+        type: "string",
+        required: false,
+        allowed: Object.values(BillingInterval),
+      },
+      { field: "trialDays", type: "number", required: false },
+      { field: "gracePeriod", type: "number", required: false },
+    ],
+  },
+  {
+    field: "features",
+    type: "array",
+    required: false,
+    children: [{ field: "", type: "string" }],
+  },
+  {
+    field: "renewal",
+    type: "object",
+    required: false,
+    children: [
+      { field: "price", type: "number", required: false },
+      { field: "autoRenew", type: "boolean", required: false },
+    ],
+  },
 
-    // Event product fields
-    {
-      field: "eventType",
-      type: "string",
-      required: false,
-      conditional: (data) => data.type === "event",
-      validator: (data, value) => {
-        if (data.type === "event") {
-          if (!value) return "eventType is required for event products";
-          if (!["online", "offline", "hybrid"].includes(value)) {
-            return "eventType must be 'online', 'offline', or 'hybrid'";
-          }
-        }
-        return true;
-      }
-    },
-    {
-      field: "eventDetails",
-      type: "object",
-      required: false,
-      conditional: (data) => data.type === "event",
-      validator: (data, value) => {
-        if (data.type === "event") {
-          if (!value) return "eventDetails is required for event products";
-          
-          // Validate required event details fields
-          const requiredFields = ["startDate", "endDate", "registeredCount", "waitlistEnabled"];
-          for (const field of requiredFields) {
-            if (value[field] === undefined || value[field] === null) {
-              return `eventDetails.${field} is required`;
-            }
-          }
-
-          // Validate field types
-          if (typeof value.startDate !== "string") return "eventDetails.startDate must be a string";
-          if (typeof value.endDate !== "string") return "eventDetails.endDate must be a string";
-          if (typeof value.registeredCount !== "number") return "eventDetails.registeredCount must be a number";
-          if (typeof value.waitlistEnabled !== "boolean") return "eventDetails.waitlistEnabled must be a boolean";
-
-          // Validate optional fields if present
-          if (value.venueName && typeof value.venueName !== "string") {
-            return "eventDetails.venueName must be a string";
-          }
-          if (value.onlineUrl && typeof value.onlineUrl !== "string") {
-            return "eventDetails.onlineUrl must be a string";
-          }
-          if (value.capacity && typeof value.capacity !== "number") {
-            return "eventDetails.capacity must be a number";
-          }
-
-          // Validate location if present
-          if (value.location) {
-            const location = value.location;
-            const locationRequiredFields = ["address", "city", "country"];
-            for (const field of locationRequiredFields) {
-              if (!location[field]) {
-                return `eventDetails.location.${field} is required when location is provided`;
-              }
-            }
-
-            // Validate coordinates if present
-            if (location.coordinates) {
-              if (typeof location.coordinates.lat !== "number" || typeof location.coordinates.lng !== "number") {
-                return "eventDetails.location.coordinates must include lat and lng as numbers";
-              }
-            }
-          }
-        }
-        return true;
-      }
-    }
-  ];
-}
-
-// Helper function to validate data against dynamic schema
-export function validateDynamicSchema(schema: DynamicValidation[], data: any): { isValid: boolean; errors: string[]; validatedData: any } {
-  const errors: string[] = [];
-  const validatedData = { ...data };
-
-  for (const validation of schema) {
-    const fieldValue = data[validation.field];
-
-    // Check if field should be validated based on conditions
-    if (validation.conditional && !validation.conditional(data)) {
-      continue;
-    }
-
-    // Check required fields
-    if (validation.required && (fieldValue === undefined || fieldValue === null || fieldValue === "")) {
-      errors.push(`${validation.field} is required`);
-      continue;
-    }
-
-    // Skip validation if field is not present and not required
-    if (!validation.required && (fieldValue === undefined || fieldValue === null)) {
-      continue;
-    }
-
-    // Type validation
-    if (fieldValue !== undefined && fieldValue !== null) {
-      const typeValid = validateFieldType(fieldValue, validation.type);
-      if (!typeValid) {
-        errors.push(`${validation.field} must be of type ${validation.type}`);
-        continue;
-      }
-    }
-
-    // Custom validation
-    if (validation.validator) {
-      const validationResult = validation.validator(data, fieldValue);
-      if (validationResult !== true) {
-        errors.push(typeof validationResult === "string" ? validationResult : `${validation.field} is invalid`);
-      }
-    }
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-    validatedData
-  };
-}
-
-// Helper function to validate field types
-function validateFieldType(value: any, type: string): boolean {
-  switch (type) {
-    case "string":
-      return typeof value === "string";
-    case "number":
-      return typeof value === "number" && !isNaN(value);
-    case "boolean":
-      return typeof value === "boolean";
-    case "array":
-      return Array.isArray(value);
-    case "object":
-      return typeof value === "object" && value !== null && !Array.isArray(value);
-    default:
-      return true;
-  }
-}
+  // Event
+  {
+    field: "eventType",
+    type: "string",
+    required: false,
+    allowed: Object.values(EventType),
+  },
+  {
+    field: "eventDetails",
+    type: "object",
+    required: false,
+    children: [
+      { field: "startDate", type: "string", required: false },
+      { field: "endDate", type: "string", required: false },
+      { field: "venueName", type: "string", required: false },
+      { field: "onlineUrl", type: "string", required: false },
+      {
+        field: "location",
+        type: "object",
+        required: false,
+        children: [
+          { field: "address", type: "string", required: false },
+          { field: "city", type: "string", required: false },
+          { field: "state", type: "string", required: false },
+          { field: "country", type: "string", required: false },
+          { field: "postalCode", type: "string", required: false },
+          {
+            field: "coordinates",
+            type: "object",
+            required: false,
+            children: [
+              { field: "lat", type: "number", required: false },
+              { field: "lng", type: "number", required: false },
+            ],
+          },
+        ],
+      },
+      { field: "capacity", type: "number", required: false },
+      { field: "registeredCount", type: "number", required: false },
+      { field: "waitlistEnabled", type: "boolean", required: false },
+    ],
+  },
+];

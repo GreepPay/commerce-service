@@ -47,7 +47,7 @@ export class SaleService {
             taxAmount,
             discountAmount,
             totalAmount,
-            currency: "NGN",
+            currency: products[0].currency,
             status: SaleStatus.PENDING,
             appliedDiscounts: discountResult.appliedDiscounts,
             taxDetails: taxResult.taxDetails,

@@ -16,6 +16,7 @@ export interface BaseProduct {
   taxCode: string;
   categoryIds: string[];
   tags: string[];
+  images: string[];
   createdAt: Date;
   updatedAt: Date; 
 }
@@ -118,7 +119,7 @@ export interface ProductVariant {
   attributes: Record<string, string>; // { color: 'red', size: 'xl' }
   priceAdjustment: number;
   inventory?: number; // Overrides parent stock
-  images?: string[];
+  images: string;
 }
 
 // ========================

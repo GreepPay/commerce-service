@@ -1,7 +1,18 @@
 import { ProductService } from "../services/ProductService";
 import HttpResponse from "../common/HttpResponse";
 import type { BunRequest, Validation } from "../routes/router";
-import type { ICreateProduct } from "../forms/products";
+import {
+  BillingInterval,
+  LicenseType,
+  ProductType,
+  ShippingClass,
+  type ICreateProduct,
+} from "../forms/products";
+import { EventType, ProductStatus } from "../models/Product";
+import {
+  baseProductFields,
+  optionalTypeFields,
+} from "../helper/validation/productValidation";
 
 export class ProductController {
   private productService: ProductService;
@@ -16,25 +27,13 @@ export class ProductController {
    * @param request - Incoming HTTP request
    * @returns HTTP response with created product or error
    */
+
   async createProduct(request: BunRequest) {
     try {
-      const validations: Validation[] = [
-        { field: "name", type: "string", required: true },
-        { field: "description", type: "string", required: true },
-        { field: "type", type: "string", required: true },
-        { field: "price", type: "number", required: true },
-        { field: "status", type: "string", required: false },
-        { field: "currency", type: "string", required: true },
-        { field: "categoryIds", type: "array", required: false },
-        { field: "tags", type: "array", required: false },
-      ];
-
-      let productData: ICreateProduct = (await request.validate(
-        validations
-      )) as ICreateProduct;
+      const allFields = [...baseProductFields, ...optionalTypeFields];
+      const productData = await request.validate(allFields);
 
       const result = await this.productService.createProduct(productData);
-
       return HttpResponse.success("Product created successfully", result, 201);
     } catch (error: any) {
       return HttpResponse.failure(

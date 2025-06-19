@@ -12,6 +12,7 @@ export interface ProcessSaleRequest {
   discountCodes?: string[];
   paymentMethod: PaymentMethod;
   metadata?: Record<string, any>;
+  currency?: string
 }
 
 export interface RefundRequest {
