@@ -1,6 +1,11 @@
-import { BillingInterval, EventType, ProductStatus, ProductType, ShippingClass } from "../../forms/products";
+import {
+  BillingInterval,
+  EventType,
+  ProductStatus,
+  ProductType,
+  ShippingClass,
+} from "../../forms/products";
 import type { Validation } from "../../routes/router";
-
 
 export const baseProductFields: Validation[] = [
   { field: "name", type: "string", required: true },
@@ -38,6 +43,9 @@ export const baseProductFields: Validation[] = [
     children: [{ field: "", type: "string" }],
   },
   { field: "businessId", type: "number", required: true },
+  { field: "inventoryCount", type: "number", required: false },
+  { field: "stockThreshold", type: "number", required: false },
+  { field: "isBackorderAllowed", type: "boolean", required: false },
 ];
 
 export const optionalTypeFields: Validation[] = [

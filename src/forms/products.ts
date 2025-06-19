@@ -16,7 +16,10 @@ export interface BaseProduct {
   taxCode: string;
   categoryIds: string[];
   tags: string[];
-  images: string[];
+  images?: string[];
+  inventoryCount?: number;
+  stockThreshold?: number;
+  isBackorderAllowed?: boolean;
   createdAt: Date;
   updatedAt: Date; 
 }
