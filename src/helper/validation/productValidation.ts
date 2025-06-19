@@ -1,6 +1,7 @@
 import {
   BillingInterval,
   EventType,
+  LicenseType,
   ProductStatus,
   ProductType,
   ShippingClass,
