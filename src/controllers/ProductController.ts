@@ -98,11 +98,7 @@ export class ProductController {
 
       const result = await this.productService.deleteProduct(parseInt(id));
 
-      if (result === true) {
-        return HttpResponse.success("Product deleted successfully", null, 204);
-      }
-
-      return result;
+      return HttpResponse.success("Product deleted successfully", null, 204);
     } catch (error: any) {
       return HttpResponse.failure(
         error.message || "Internal server error",

@@ -180,6 +180,52 @@ const controller = new ProductController();
  *       400:
  *         description: Invalid request
  */
+router.add("POST", `/${APP_VERSION}/products`, async (request: BunRequest) => {
+  const result = await controller.createProduct(request);
+  return new Response(JSON.stringify(result.body), {
+    headers: { "Content-Type": "application/json" },
+    status: result.statusCode,
+  });
+});
+
+/**
+ * @swagger
+ * /v1/products/{id}:
+ *   put:
+ *     summary: Update product
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               categories:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               metadata:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Product updated successfully
+ *       404:
+ *         description: Product not found
+ */
 router.add(
   "PUT",
   `/${APP_VERSION}/products/:id`,
