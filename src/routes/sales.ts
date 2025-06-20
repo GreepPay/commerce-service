@@ -64,11 +64,8 @@ router.add(
   `/${APP_VERSION}/sales/process`,
   async (request: BunRequest) => {
     const result = await controller.processSale(request);
-    return new Response(JSON.stringify(result.body), {
-      headers: { "Content-Type": "application/json" },
-      status: result.statusCode,
-    });
-  }
+    return result;
+  },
 );
 
 /**
@@ -123,11 +120,8 @@ router.add(
   `/${APP_VERSION}/sales/:id/refund`,
   async (request: BunRequest) => {
     const result = await controller.processSaleRefund(request);
-    return new Response(JSON.stringify(result.body), {
-      headers: { "Content-Type": "application/json" },
-      status: result.statusCode,
-    });
-  }
+    return result;
+  },
 );
 
 /**
@@ -167,11 +161,8 @@ router.add(
   `/${APP_VERSION}/discounts/apply`,
   async (request: BunRequest) => {
     const result = await controller.validateDiscountCode(request);
-    return new Response(JSON.stringify(result.body), {
-      headers: { "Content-Type": "application/json" },
-      status: result.statusCode,
-    });
-  }
+    return result;
+  },
 );
 
 /**
@@ -230,11 +221,8 @@ router.add(
   `/${APP_VERSION}/taxes/calculate`,
   async (request: BunRequest) => {
     const result = await controller.calculateTaxes(request);
-    return new Response(JSON.stringify(result.body), {
-      headers: { "Content-Type": "application/json" },
-      status: result.statusCode,
-    });
-  }
+    return result;
+  },
 );
 
 /**

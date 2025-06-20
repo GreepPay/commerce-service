@@ -90,9 +90,6 @@ router.add(
   `/${APP_VERSION}/tickets/:id`,
   async (request: BunRequest) => {
     const result = await ticketController.updateTicket(request);
-    return new Response(JSON.stringify(result.body), {
-      headers: { "Content-Type": "application/json" },
-      status: result.statusCode,
-    });
-  }
+    return result;
+  },
 );
