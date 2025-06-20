@@ -20,9 +20,6 @@ export enum TicketStatus {
 
 @Entity()
 export class Ticket extends BaseModel {
-  @PrimaryGeneratedColumn()
-  id!: number;
-
   @Column()
   productId!: number;
 
@@ -58,7 +55,4 @@ export class Ticket extends BaseModel {
     default: TicketStatus.ACTIVE,
   })
   status!: TicketStatus;
-
-  @CreateDateColumn()
-  createdAt!: Date;
 }

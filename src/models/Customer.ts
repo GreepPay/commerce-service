@@ -31,6 +31,6 @@ export class Customer extends BaseModel {
   @Column({ type: "varchar", length: 255, nullable: true })
   country?: string;
 
-  @OneToMany(() => Order, (order) => order.customer)
+  @OneToMany(() => Order, (order) => order.customerId)
   orders!: Order[];
 }
