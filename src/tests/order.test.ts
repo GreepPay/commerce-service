@@ -34,7 +34,6 @@ describe("OrderService", () => {
       entities: [OrderModel, Delivery, Product, Category, Sale],
       synchronize: true,
       logging: false,
-      // Add foreign key support for SQLite
       extra: {
         pragma: "foreign_keys = ON"
       }
@@ -58,32 +57,23 @@ describe("OrderService", () => {
   });
 
   beforeEach(async () => {
-    // Clear tables in the correct order to avoid foreign key constraint violations
-    // Start with child tables first, then parent tables
-    
-    // First, disable foreign key checks temporarily
     await dataSource.query("PRAGMA foreign_keys = OFF");
-    
     try {
-      // Clear in reverse dependency order
       await dataSource.getRepository(OrderModel).clear();
       await dataSource.getRepository(Sale).clear();
       await dataSource.getRepository(Delivery).clear();
       await dataSource.getRepository(Product).clear();
       await dataSource.getRepository(Category).clear();
     } finally {
-      // Re-enable foreign key checks
       await dataSource.query("PRAGMA foreign_keys = ON");
     }
 
-    // Create test category
     const category = dataSource.getRepository(Category).create({
       name: "electronics",
       slug: "electronics",
     });
     await dataSource.getRepository(Category).save(category);
 
-    // Create test product
     testProduct = await productService.createProduct({
       name: "Reusable Product",
       sku: "sku-order-001",
@@ -95,7 +85,10 @@ describe("OrderService", () => {
       businessId: 1,
       categoryIds: [],
       tags: [],
+      images: [],
       inventoryCount: 10,
+      stockThreshold: 2,
+      isBackorderAllowed: false,
     });
   });
 
@@ -128,52 +121,6 @@ describe("OrderService", () => {
     testOrder = result.order;
   });
 
-  // it("should throw an error if a product does not exist", async () => {
-  //   const orderData: OrderForm = {
-  //     customerId: 123,
-  //     paymentMethod: "card",
-  //     shippingAddress: { street: "Nowhere" },
-  //     billingAddress: { street: "Nowhere" },
-  //     items: [
-  //       {
-  //         productId: "non-existent-id",
-  //         quantity: 1,
-  //         price: 500,
-  //         total: 500,
-  //       },
-  //     ],
-  //   };
-
-  //   await expect(orderService.createOrder(orderData)).rejects.toMatchObject({
-  //       status: 404,
-  //       message: "Product not found",
-  //     });
-  // });
-
-  // it("should fail if ordered quantity exceeds product inventory", async () => {
-  //   // Update the product directly using the repository to avoid potential issues
-  //   await dataSource.getRepository(Product).update(testProduct.id, { inventoryCount: 1 });
-
-  //   const orderData: OrderForm = {
-  //     customerId: 999,
-  //     paymentMethod: "card",
-  //     shippingAddress: { street: "Shortage Ave" },
-  //     billingAddress: { street: "Shortage Ave" },
-  //     items: [
-  //       {
-  //         productId: testProduct.id,
-  //         quantity: 2,
-  //         price: 1000,
-  //         total: 2000,
-  //       },
-  //     ],
-  //   };
-
-  //   await expect(orderService.createOrder(orderData)).rejects.toThrow(
-  //     /Insufficient inventory/i
-  //   );
-  // });
-
   it("should reduce product inventory after successful order", async () => {
     const initialInventory = testProduct.inventoryCount;
 
@@ -193,10 +140,8 @@ describe("OrderService", () => {
     };
 
     await orderService.createOrder(orderData);
-    
-    // Use repository to find the updated product
-    const updatedProduct = await dataSource.getRepository(Product).findOneByOrFail({ id: testProduct.id });
 
+    const updatedProduct = await dataSource.getRepository(Product).findOneByOrFail({ id: testProduct.id });
     expect(updatedProduct.inventoryCount).toBe(initialInventory - 3);
   });
 

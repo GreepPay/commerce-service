@@ -10,6 +10,7 @@ import type { Validation } from "../../routes/router";
 
 export const baseProductFields: Validation[] = [
   { field: "name", type: "string", required: true },
+  { field: "sku", type: "string", required: true },
   { field: "description", type: "string", required: true },
   {
     field: "type",
@@ -41,7 +42,18 @@ export const baseProductFields: Validation[] = [
     field: "images",
     type: "array",
     required: false,
-    children: [{ field: "", type: "string" }],
+    children: [
+      {
+        field: "",
+        type: "object",
+        required: false,
+        children: [
+          { field: "url", type: "string", required: true },
+          { field: "altText", type: "string", required: false },
+          { field: "isPrimary", type: "boolean", required: false },
+        ],
+      },
+    ],
   },
   { field: "businessId", type: "number", required: true },
   { field: "inventoryCount", type: "number", required: false },
@@ -50,6 +62,32 @@ export const baseProductFields: Validation[] = [
 ];
 
 export const optionalTypeFields: Validation[] = [
+  // Variants
+  {
+    field: "variants",
+    type: "array",
+    required: false,
+    children: [
+      {
+        field: "",
+        type: "object",
+        required: false,
+        children: [
+          { field: "id", type: "string", required: true },
+          { field: "sku", type: "string", required: true },
+          {
+            field: "attributes",
+            type: "object",
+            required: false,
+          },
+          { field: "priceAdjustment", type: "number", required: false },
+          { field: "inventory", type: "number", required: false },
+          { field: "images", type: "string", required: false },
+        ],
+      },
+    ],
+  },
+
   // Physical
   { field: "weight", type: "number", required: false },
   {
@@ -188,4 +226,9 @@ export const optionalTypeFields: Validation[] = [
       { field: "waitlistEnabled", type: "boolean", required: false },
     ],
   },
+];
+
+export const fullProductValidationSchema: Validation[] = [
+  ...baseProductFields,
+  ...optionalTypeFields,
 ];

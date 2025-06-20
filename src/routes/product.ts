@@ -22,7 +22,11 @@ const controller = new ProductController();
  *               - type
  *               - currency
  *               - businessId
+ *               - sku
  *             properties:
+ *               sku:
+ *                 type: string
+ *                 description: Unique Stock Keeping Unit
  *               name:
  *                 type: string
  *               description:
@@ -48,7 +52,14 @@ const controller = new ProductController();
  *               images:
  *                 type: array
  *                 items:
- *                   type: string
+ *                   type: object
+ *                   properties:
+ *                     url:
+ *                       type: string
+ *                     altText:
+ *                       type: string
+ *                     isPrimary:
+ *                       type: boolean
  *               businessId:
  *                 type: number
  *               inventoryCount:
@@ -60,78 +71,93 @@ const controller = new ProductController();
  *                 type: boolean
  *
  *               # Physical-specific (optional)
- *               weight:
- *                 type: number
- *               dimensions:
+ *               physicalDetails:
  *                 type: object
  *                 properties:
- *                   length:
- *                     type: number
- *                   width:
- *                     type: number
- *                   height:
- *                     type: number
- *               shippingClass:
- *                 type: string
- *                 enum: [standard, express, oversized]
- *               inventory:
- *                 type: object
- *                 properties:
- *                   stock:
- *                     type: number
- *                   lowStockThreshold:
- *                     type: number
- *                   isBackorderAllowed:
- *                     type: boolean
- *
- *               # Digital-specific (optional)
- *               download:
- *                 type: object
- *                 properties:
- *                   url:
- *                     type: string
- *                   accessExpiration:
- *                     type: string
- *                   downloadLimit:
- *                     type: number
- *               license:
- *                 type: object
- *                 properties:
- *                   key:
- *                     type: string
  *                   type:
  *                     type: string
- *                     enum: [single, multi, perpetual]
- *               fileInfo:
+ *                   weight:
+ *                     type: number
+ *                   dimensions:
+ *                     type: object
+ *                     properties:
+ *                       length:
+ *                         type: number
+ *                       width:
+ *                         type: number
+ *                       height:
+ *                         type: number
+ *                   shippingClass:
+ *                     type: string
+ *                     enum: [standard, express, oversized]
+ *                   inventory:
+ *                     type: object
+ *                     properties:
+ *                       stock:
+ *                         type: number
+ *                       lowStockThreshold:
+ *                         type: number
+ *                       isBackorderAllowed:
+ *                         type: boolean
+ *
+ *               # Digital-specific (optional)
+ *               digitalDetails:
  *                 type: object
  *                 properties:
- *                   size:
- *                     type: number
- *                   format:
+ *                   type:
  *                     type: string
+ *                   download:
+ *                     type: object
+ *                     properties:
+ *                       url:
+ *                         type: string
+ *                       accessExpiration:
+ *                         type: string
+ *                       downloadLimit:
+ *                         type: number
+ *                   license:
+ *                     type: object
+ *                     properties:
+ *                       key:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *                         enum: [single, multi, perpetual]
+ *                   fileInfo:
+ *                     type: object
+ *                     properties:
+ *                       size:
+ *                         type: number
+ *                       format:
+ *                         type: string
  *
  *               # Subscription-specific (optional)
- *               billing:
+ *               subscriptionDetails:
  *                 type: object
  *                 properties:
- *                   interval:
+ *                   type:
  *                     type: string
- *                     enum: [monthly, annual, custom]
- *                   trialDays:
- *                     type: number
- *                   gracePeriod:
- *                     type: number
- *               features:
- *                 type: array
- *                 items:
- *                   type: string
- *               renewal:
- *                 type: object
- *                 properties:
- *                   price:
- *                     type: number
- *                   autoRenew:
- *                     type: boolean
+ *                   billing:
+ *                     type: object
+ *                     properties:
+ *                       interval:
+ *                         type: string
+ *                         enum: [monthly, annual, custom]
+ *                       trialDays:
+ *                         type: number
+ *                       gracePeriod:
+ *                         type: number
+ *                   features:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                   renewal:
+ *                     type: object
+ *                     properties:
+ *                       price:
+ *                         type: number
+ *                       autoRenew:
+ *                         type: boolean
  *
  *               # Event-specific (optional)
  *               eventType:

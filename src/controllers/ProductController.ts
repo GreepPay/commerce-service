@@ -13,6 +13,7 @@ import {
   baseProductFields,
   optionalTypeFields,
 } from "../helper/validation/productValidation";
+import { validateProductInput } from "../helper/validation/validateProductInput";
 
 export class ProductController {
   private productService: ProductService;
@@ -29,19 +30,18 @@ export class ProductController {
    */
 
   async createProduct(request: BunRequest) {
-    try {
-      const allFields = [...baseProductFields, ...optionalTypeFields];
-      const productData = await request.validate(allFields);
+  try {
+    const productData = await validateProductInput(request);
 
-      const result = await this.productService.createProduct(productData);
-      return HttpResponse.success("Product created successfully", result, 201);
-    } catch (error: any) {
-      return HttpResponse.failure(
-        error.message || "Internal server error",
-        error.status || 500
-      );
-    }
+    const result = await this.productService.createProduct(productData);
+    return HttpResponse.success("Product created successfully", result, 201);
+  } catch (error: any) {
+    return HttpResponse.failure(
+      error.message || "Internal server error",
+      error.status || 500
+    );
   }
+}
 
   /**
    * Handles updating an existing product.
