@@ -16,7 +16,7 @@ export interface Ticket {
 export interface ICreateTicket {
   productId: string;
   saleId: string;
-  userId: string;
+  userId: number;
   variantId?: string;
   ticketType: string;
   price: number;
