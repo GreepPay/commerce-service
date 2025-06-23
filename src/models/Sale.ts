@@ -1,5 +1,6 @@
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
 import { BaseModel, getEnumType, getJsonType } from "./BaseModel";
+import { Order } from "./Order";
 
 export enum SaleStatus {
   PENDING = "pending",
@@ -22,12 +23,11 @@ export class Sale extends BaseModel {
   @Column({ type: "varchar", length: 255 })
   transactionId!: string;
 
-  // @ManyToOne(() => Customer)
-  // @JoinColumn()
-  // customer!: Customertype;
-
   @Column()
   customerId!: number;
+
+  @Column()
+  businessId!: number;
 
   @Column({ type: "decimal", precision: 10, scale: 2 })
   subtotalAmount!: number;
@@ -103,4 +103,11 @@ export class Sale extends BaseModel {
 
   @Column({ type: getJsonType(), nullable: true })
   metadata?: Record<string, any>;
+
+  @ManyToOne(() => Order, (order) => order.sales, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
+  @JoinColumn()
+  order?: Order;
 }

@@ -35,9 +35,10 @@ export class Order extends BaseModel {
   @Column()
   customerId!: number;
 
-  @ManyToOne(() => Sale)
-  @JoinColumn()
-  sale!: Saletype;
+  @OneToMany(() => Sale, (sale) => sale.order, {
+    cascade: false,
+  })
+  sales!: Sale[];
 
   @Column({ type: getJsonType() })
   items!: Array<{

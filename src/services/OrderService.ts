@@ -10,7 +10,7 @@ import type { Order } from "../forms/orders";
 import { SaleService } from "./SaleService";
 import { DeliveryService } from "./DeliveryService";
 import { DeliveryStatus } from "../forms/delivery";
-import { PaymentMethod } from "../models/Sale";
+import { PaymentMethod, Sale } from "../models/Sale";
 import { Delivery } from "../models/Delivery";
 import type { TicketService } from "./TicketService";
 import { ProductType } from "../forms/products";
@@ -53,17 +53,31 @@ export class OrderService {
       },
     });
 
-    if (!saleResult.body.success) return saleResult;
+    // ✅ Handle failure or no sales
+    if (
+      !saleResult.body.success ||
+      !saleResult.body.data ||
+      (Array.isArray(saleResult.body.data) && saleResult.body.data.length === 0)
+    ) {
+      throw {
+        status: 400,
+        message: "Sales Creation Failed",
+      };
+    }
 
-    const sale = saleResult.body.data;
+    const sales: Sale[] = Array.isArray(saleResult.body.data)
+      ? saleResult.body.data
+      : [saleResult.body.data];
+
+    const firstSale = sales[0];
 
     return await OrderModel.getRepository().manager.transaction(
       async (manager: EntityManager) => {
-        // Create the order
         const order = OrderModel.create({
-          orderNumber: sale.metadata.orderNumber,
+          orderNumber:
+            firstSale.metadata?.orderNumber || this.generateOrderNumber(),
           customerId: orderData.customerId,
-          sale: { id: sale.id },
+          sale: { id: firstSale.id }, // optionally keep for reference
           items: orderData.items.map((item) => ({
             product: { id: item.productId },
             quantity: item.quantity,
@@ -73,17 +87,17 @@ export class OrderService {
             discountAmount: item.discountAmount || 0,
             total: item.total || item.price * item.quantity,
           })),
-          subtotalAmount: sale.subtotalAmount,
-          taxAmount: sale.taxAmount,
-          discountAmount: sale.discountAmount,
-          totalAmount: sale.totalAmount,
-          currency: sale.currency,
-          appliedDiscounts: sale.appliedDiscounts,
-          taxDetails: sale.taxDetails,
+          subtotalAmount: sales.reduce((sum, s) => sum + s.subtotalAmount, 0),
+          taxAmount: sales.reduce((sum, s) => sum + s.taxAmount, 0),
+          discountAmount: sales.reduce((sum, s) => sum + s.discountAmount, 0),
+          totalAmount: sales.reduce((sum, s) => sum + s.totalAmount, 0),
+          currency: firstSale.currency,
+          appliedDiscounts: firstSale.appliedDiscounts,
+          taxDetails: firstSale.taxDetails,
           status: OrderStatus.PENDING,
           shippingAddress: orderData.shippingAddress,
           billingAddress: orderData.billingAddress,
-          paymentMethod: sale.paymentDetails.method,
+          paymentMethod: firstSale.paymentDetails.method,
           paymentStatus: PaymentStatus.PENDING,
           statusHistory: [
             {
@@ -95,6 +109,15 @@ export class OrderService {
         });
 
         const savedOrder = await manager.save(order);
+
+        // Optional: attach orderId back to each sale
+        for (const sale of sales) {
+          sale.metadata = {
+            ...(sale.metadata || {}),
+            orderId: savedOrder.id,
+          };
+          await manager.save(sale);
+        }
 
         // Create delivery
         const delivery = Delivery.create({
@@ -114,31 +137,34 @@ export class OrderService {
 
         const savedDelivery = await manager.save(delivery);
 
-        // Create tickets if event products are involved
+        // Fetch event-type products
         const eventProducts = await Product.findBy({
-          id: In(
-            sale.items.map((item: { productId: string }) => item.productId)
-          ),
+          id: In(orderData.items.map((item) => item.productId)),
           type: ProductType.EVENT,
         });
 
+        // Handle ticket creation per sale that contains event products
+        const tickets: any[] = [];
         if (eventProducts.length > 0) {
-          const tickets = await this.ticketService.createFromSale(
-            sale,
-            manager
-          );
-          return {
-            order: savedOrder,
-            sale,
-            delivery: savedDelivery,
-            tickets,
-          };
+          for (const sale of sales) {
+            const hasEvent = sale.items.some((item) =>
+              eventProducts.some((ep) => ep.id.toString() === item.productId)
+            );
+            if (hasEvent) {
+              const generated = await this.ticketService.createFromSale(
+                sale,
+                manager
+              );
+              tickets.push(...generated);
+            }
+          }
         }
 
         return {
           order: savedOrder,
-          sale,
+          sale: sales,
           delivery: savedDelivery,
+          ...(tickets.length > 0 && { tickets }),
         };
       }
     );
@@ -219,7 +245,7 @@ export class OrderService {
         });
 
         for (const item of order.items || []) {
-           if (!item.product) continue;
+          if (!item.product) continue;
           const product = await Product.findOneBy({ id: item.product.id });
           if (product && typeof product.inventoryCount === "number") {
             product.inventoryCount += item.quantity;

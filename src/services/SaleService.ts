@@ -16,38 +16,124 @@ import { calculateTotals, applyDiscounts } from "../common/saleUtils";
 export class SaleService {
   private readonly DEFAULT_TAX_RATE = 0.075; // 7.5% VAT
 
-  async processSale(saleData: ProcessSaleRequest): Promise<HttpResponseType> {
-    try {
-      return await Sale.getRepository().manager.transaction(
-        async (transactionalEntityManager: EntityManager) => {
-          const productsResult = await this.validateAndGetProducts(saleData.items);
-          if (!productsResult.success) {
-            return productsResult.response!;
+  // async processSale(saleData: ProcessSaleRequest): Promise<HttpResponseType> {
+  //   try {
+  //     return await Sale.getRepository().manager.transaction(
+  //       async (transactionalEntityManager: EntityManager) => {
+  //         const productsResult = await this.validateAndGetProducts(saleData.items);
+  //         if (!productsResult.success) {
+  //           return productsResult.response!;
+  //         }
+
+  //         const products = productsResult.products!;
+  //         const items = this.calculateItemTotals(products, saleData.items);
+  //         const discountResult = await applyDiscounts(
+  //           items,
+  //           saleData.discountCodes || [],
+  //           this.findDiscount.bind(this),
+  //           this.isDiscountValid.bind(this)
+  //         );
+  //         const taxResult = await this.calculateTaxes(items);
+
+  //         const { subtotalAmount, taxAmount, discountAmount, totalAmount } =
+  //           calculateTotals(items, taxResult.taxDetails, discountResult.appliedDiscounts);
+
+  //         const sale = new Sale();
+  //         Object.assign(sale, {
+  //           transactionId: `txn_${Date.now()}`,
+  //           customerId: saleData.customerId,
+  //           items,
+  //           subtotalAmount,
+  //           taxAmount,
+  //           discountAmount,
+  //           totalAmount,
+  //           currency: products[0].currency,
+  //           status: SaleStatus.PENDING,
+  //           appliedDiscounts: discountResult.appliedDiscounts,
+  //           taxDetails: taxResult.taxDetails,
+  //           paymentDetails: {
+  //             method: saleData.paymentMethod,
+  //             transactionDate: new Date(),
+  //           },
+  //           metadata: saleData.metadata,
+  //         });
+
+  //         for (const item of items) {
+  //           const product = products.find((p) => p.id.toString() === item.productId);
+  //           if (!product) continue;
+
+  //           const variant = item.variantId
+  //             ? product.variants?.find((v) => v.id === item.variantId)
+  //             : undefined;
+
+  //           if (variant?.inventory !== undefined) {
+  //             variant.inventory -= item.quantity;
+  //             product.variants = [...product.variants];
+  //           }
+
+  //           if (!item.variantId && product.inventoryCount !== undefined) {
+  //             product.inventoryCount -= item.quantity;
+  //           }
+
+  //           await transactionalEntityManager.save(product);
+  //         }
+
+  //         await transactionalEntityManager.save(sale);
+  //         return HttpResponse.success("Sale processed successfully", sale);
+  //       }
+  //     );
+  //   } catch (error) {
+  //     console.log(error)
+  //     return HttpResponse.failure("Failed to process sale", 400);
+  //   }
+  // }
+
+async processSale(saleData: ProcessSaleRequest): Promise<HttpResponseType> {
+  try {
+    return await Sale.getRepository().manager.transaction(
+      async (transactionalEntityManager: EntityManager) => {
+        const productsResult = await this.validateAndGetProducts(saleData.items);
+        if (!productsResult.success) {
+          return productsResult.response!;
+        }
+
+        const products = productsResult.products!;
+        const items = this.calculateItemTotals(products, saleData.items);
+
+        const discountResult = await applyDiscounts(
+          items,
+          saleData.discountCodes || [],
+          this.findDiscount.bind(this),
+          this.isDiscountValid.bind(this)
+        );
+        const taxResult = await this.calculateTaxes(items);
+
+        const savedSales: Sale[] = [];
+
+        console.log("Resolved products:", products.map(p => p.id));
+        console.log("Input items:", items.map(i => i.productId));
+
+        for (const item of items) {
+          const product = products.find(p => p.id === Number(item.productId));
+          if (!product) {
+            console.warn(`⚠️ No product found for item.productId = ${item.productId}`);
+            continue;
           }
 
-          const products = productsResult.products!;
-          const items = this.calculateItemTotals(products, saleData.items);
-          const discountResult = await applyDiscounts(
-            items,
-            saleData.discountCodes || [],
-            this.findDiscount.bind(this),
-            this.isDiscountValid.bind(this)
-          );
-          const taxResult = await this.calculateTaxes(items);
-
           const { subtotalAmount, taxAmount, discountAmount, totalAmount } =
-            calculateTotals(items, taxResult.taxDetails, discountResult.appliedDiscounts);
+            calculateTotals([item], taxResult.taxDetails, discountResult.appliedDiscounts);
 
           const sale = new Sale();
           Object.assign(sale, {
-            transactionId: `txn_${Date.now()}`,
+            transactionId: `txn_${Date.now()}_${item.productId}`,
             customerId: saleData.customerId,
-            items,
+            businessId: product.businessId,
+            items: [item],
             subtotalAmount,
             taxAmount,
             discountAmount,
             totalAmount,
-            currency: products[0].currency,
+            currency: product.currency,
             status: SaleStatus.PENDING,
             appliedDiscounts: discountResult.appliedDiscounts,
             taxDetails: taxResult.taxDetails,
@@ -58,35 +144,38 @@ export class SaleService {
             metadata: saleData.metadata,
           });
 
-          for (const item of items) {
-            const product = products.find((p) => p.id.toString() === item.productId);
-            if (!product) continue;
+          const variant = item.variantId
+            ? product.variants?.find(v => v.id === item.variantId)
+            : undefined;
 
-            const variant = item.variantId
-              ? product.variants?.find((v) => v.id === item.variantId)
-              : undefined;
-
-            if (variant?.inventory !== undefined) {
-              variant.inventory -= item.quantity;
-              product.variants = [...product.variants];
-            }
-
-            if (!item.variantId && product.inventoryCount !== undefined) {
-              product.inventoryCount -= item.quantity;
-            }
-
-            await transactionalEntityManager.save(product);
+          if (variant?.inventory !== undefined) {
+            variant.inventory -= item.quantity;
+            product.variants = [...product.variants];
           }
 
+          if (!item.variantId && product.inventoryCount !== undefined) {
+            product.inventoryCount -= item.quantity;
+          }
+
+          await transactionalEntityManager.save(product);
           await transactionalEntityManager.save(sale);
-          return HttpResponse.success("Sale processed successfully", sale);
+
+          savedSales.push(sale);
         }
-      );
-    } catch (error) {
-      console.log(error)
-      return HttpResponse.failure("Failed to process sale", 400);
-    }
+
+        console.log("✅ Saved sales:", savedSales.length);
+        if (savedSales.length === 0) {
+          return HttpResponse.failure("No sales were created", 400);
+        }
+
+        return HttpResponse.success("Sales processed successfully", savedSales);
+      }
+    );
+  } catch (error) {
+    console.error("❌ processSale error:", error);
+    return HttpResponse.failure("Failed to process sale", 400);
   }
+}
 
   async processSaleRefund(saleId: string, refundData: RefundRequest): Promise<HttpResponseType> {
     try {

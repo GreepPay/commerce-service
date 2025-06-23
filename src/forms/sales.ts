@@ -97,6 +97,7 @@ export interface Sale {
   transactionId: string;
   customerId: number;
   items: SaleItem[];
+  businessId: string;
   subtotalAmount: number;
   taxAmount: number;
   discountAmount: number;
