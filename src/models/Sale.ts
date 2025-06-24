@@ -1,6 +1,6 @@
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
 import { BaseModel, getEnumType, getJsonType } from "./BaseModel";
-import { Order } from "./Order";
+import type { Order } from "./Order";
 
 export enum SaleStatus {
   PENDING = "pending",
@@ -104,7 +104,7 @@ export class Sale extends BaseModel {
   @Column({ type: getJsonType(), nullable: true })
   metadata?: Record<string, any>;
 
-  @ManyToOne(() => Order, (order) => order.sales, {
+  @ManyToOne("Order", "sales", {
     nullable: true,
     onDelete: "SET NULL",
   })
