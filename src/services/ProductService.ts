@@ -27,10 +27,10 @@ export class ProductService {
     product.description = productData.description || "";
     product.price = productData.price || 0;
     product.currency = productData.currency || "USD";
-    product.type = product.type || "physical";
-    product.variants = product.variants.length ? product.variants : [];
-    product.inventoryCount = product.inventoryCount || 0;
-    product.stockThreshold = product.stockThreshold || 0;
+    product.type = productData.type || "physical";
+    product.variants = productData.variants?.length ? productData.variants : [];
+    product.inventoryCount = productData.inventoryCount || 0;
+    product.stockThreshold = productData.stockThreshold || 0;
     product.isBackorderAllowed = productData.isBackorderAllowed || false;
     product.images = productData.images || [];
 

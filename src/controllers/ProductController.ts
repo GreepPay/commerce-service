@@ -22,8 +22,6 @@ export class ProductController {
     try {
       const productData = await validateProductInput(request);
 
-      console.log(productData);
-
       const result = await this.productService.createProduct(productData);
       return HttpResponse.success("Product created successfully", result, 201);
     } catch (error: any) {
