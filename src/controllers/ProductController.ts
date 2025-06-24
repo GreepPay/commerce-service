@@ -1,18 +1,7 @@
 import { ProductService } from "../services/ProductService";
 import HttpResponse from "../common/HttpResponse";
 import type { BunRequest, Validation } from "../routes/router";
-import {
-  BillingInterval,
-  LicenseType,
-  ProductType,
-  ShippingClass,
-  type ICreateProduct,
-} from "../forms/products";
-import { EventType, ProductStatus } from "../models/Product";
-import {
-  baseProductFields,
-  optionalTypeFields,
-} from "../helper/validation/productValidation";
+import { type ICreateProduct } from "../forms/products";
 import { validateProductInput } from "../helper/validation/validateProductInput";
 
 export class ProductController {
@@ -30,18 +19,20 @@ export class ProductController {
    */
 
   async createProduct(request: BunRequest) {
-  try {
-    const productData = await validateProductInput(request);
+    try {
+      const productData = await validateProductInput(request);
 
-    const result = await this.productService.createProduct(productData);
-    return HttpResponse.success("Product created successfully", result, 201);
-  } catch (error: any) {
-    return HttpResponse.failure(
-      error.message || "Internal server error",
-      error.status || 500
-    );
+      console.log(productData);
+
+      const result = await this.productService.createProduct(productData);
+      return HttpResponse.success("Product created successfully", result, 201);
+    } catch (error: any) {
+      return HttpResponse.failure(
+        error.message || "Internal server error",
+        error.status || 500,
+      );
+    }
   }
-}
 
   /**
    * Handles updating an existing product.
@@ -65,19 +56,19 @@ export class ProductController {
       const id = request.params.id;
 
       let productData: ICreateProduct = (await request.validate(
-        validations
+        validations,
       )) as ICreateProduct;
 
       const result = await this.productService.updateProduct(
         parseInt(id),
-        productData
+        productData,
       );
 
       return HttpResponse.success("Product updated successfully", result);
     } catch (error: any) {
       return HttpResponse.failure(
         error.message || "Internal server error",
-        error.status || 500
+        error.status || 500,
       );
     }
   }
@@ -102,7 +93,7 @@ export class ProductController {
     } catch (error: any) {
       return HttpResponse.failure(
         error.message || "Internal server error",
-        error.status || 500
+        error.status || 500,
       );
     }
   }
@@ -130,7 +121,7 @@ export class ProductController {
     } catch (error: any) {
       return HttpResponse.failure(
         error.message || "Internal server error",
-        error.status || 500
+        error.status || 500,
       );
     }
   }
