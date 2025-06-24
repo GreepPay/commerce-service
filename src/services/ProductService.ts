@@ -28,7 +28,7 @@ export class ProductService {
     product.price = productData.price || 0;
     product.currency = productData.currency || "USD";
     product.type = product.type || "physical";
-    product.variants = product.variants || [];
+    product.variants = product.variants.length ? product.variants : [];
     product.inventoryCount = product.inventoryCount || 0;
     product.stockThreshold = product.stockThreshold || 0;
     product.isBackorderAllowed = productData.isBackorderAllowed || false;
