@@ -3,6 +3,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
+  Generated,
+  Column,
 } from "typeorm";
 
 export function getDateTimeType() {
@@ -20,6 +22,10 @@ export function getJsonType() {
 export abstract class BaseModel extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
+
+  @Column({ type: "uuid" })
+  @Generated("uuid")
+  uuid!: string;
 
   @CreateDateColumn()
   createdAt!: Date;

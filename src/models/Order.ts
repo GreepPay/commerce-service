@@ -5,7 +5,7 @@ import type { Customer as Customertype } from "./Customer";
 import { Product } from "./Product";
 import { Delivery } from "./Delivery";
 import type { Delivery as Deliverytype } from "./Delivery";
-// import type { Sale as Saletype } from "./Sale";
+import { Sale } from "./Sale";
 
 export enum OrderStatus {
   PENDING = "pending",
@@ -34,10 +34,10 @@ export class Order extends BaseModel {
   @Column()
   customerId!: number;
 
-  // @OneToMany(() => Saletype, (sale) => Saletype.order, {
-  //   cascade: false,
-  // })
-  // sales!: Saletype[];
+  @OneToMany(() => Sale, (sale) => sale.order, {
+    cascade: false,
+  })
+  sales!: Sale[];
 
   @Column({ type: getJsonType() })
   items!: Array<{
