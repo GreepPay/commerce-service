@@ -16,11 +16,62 @@ export class ProductService {
       .replace(/(^-|-$)/g, "");
 
     // Set default status if not provided
-    const product = Product.create({
-      ...productData,
-      slug,
-      status: productData.status || "active",
-    });
+    const product = Product.create();
+
+    product.slug = slug;
+    product.status = productData.status || "active";
+    product.businessId = productData.businessId;
+    product.sku =
+      productData.sku || `SKU-${Math.random().toString(36).substring(2, 9)}`;
+    product.name = productData.name || "";
+    product.description = productData.description || "";
+    product.price = productData.price || 0;
+    product.currency = productData.currency || "USD";
+    product.type = product.type || "physical";
+    product.variants = product.variants || [];
+    product.inventoryCount = product.inventoryCount || 0;
+    product.stockThreshold = product.stockThreshold || 0;
+    product.isBackorderAllowed = productData.isBackorderAllowed || false;
+    product.images = productData.images || [];
+
+    // Digital products
+    if (productData.digitalDetails) {
+      product.downloadUrl = productData.digitalDetails.download.url;
+      product.downloadLimit = productData.digitalDetails.download.downloadLimit;
+    }
+
+    // Physical products
+    if (productData.physicalDetails) {
+      product.weight = productData.physicalDetails.weight;
+      product.dimensions = productData.physicalDetails.dimensions;
+    }
+
+    // Subscription products
+    if (productData.subscriptionDetails) {
+      product.billingInterval =
+        (productData.subscriptionDetails.billing.interval as
+          | "monthly"
+          | "yearly") || "monthly";
+      product.trialPeriodDays =
+        productData.subscriptionDetails.billing.trialDays || 0;
+    }
+
+    // Event products
+    if (productData.eventDetails) {
+      product.eventType = productData.eventDetails.eventType;
+      product.eventStartDate = productData.eventDetails.eventDetails.startDate;
+      product.eventEndDate = productData.eventDetails.eventDetails.endDate;
+      product.venueName = productData.eventDetails.eventDetails.venueName || "";
+      product.eventOnlineUrl =
+        productData.eventDetails.eventDetails.onlineUrl || "";
+      product.eventLocation = productData.eventDetails.eventDetails.location;
+      product.eventCapacity =
+        productData.eventDetails.eventDetails.capacity || 0;
+      product.eventRegisteredCount =
+        productData.eventDetails.eventDetails.registeredCount || 0;
+      product.eventWaitlistEnabled =
+        productData.eventDetails.eventDetails.waitlistEnabled || false;
+    }
 
     await product.save();
 
@@ -36,7 +87,7 @@ export class ProductService {
    */
   async updateProduct(
     id: number,
-    productData: Partial<ICreateProduct>
+    productData: Partial<ICreateProduct>,
   ): Promise<Product> {
     const product = await Product.findOne({
       where: { id },
@@ -49,12 +100,73 @@ export class ProductService {
       };
     }
 
+    product.businessId = productData.businessId ?? product.businessId;
+    product.sku = productData.sku ?? product.sku;
     product.name = productData.name ?? product.name;
     product.description = productData.description ?? product.description;
-    product.type = productData.type ?? product.type;
     product.price = productData.price ?? product.price;
-    product.status = productData.status ?? product.status;
     product.currency = productData.currency ?? product.currency;
+    product.type = productData.type ?? product.type;
+    product.variants = productData.variants ?? product.variants;
+    product.inventoryCount =
+      productData.inventoryCount ?? product.inventoryCount;
+    product.stockThreshold =
+      productData.stockThreshold ?? product.stockThreshold;
+    product.isBackorderAllowed =
+      productData.isBackorderAllowed ?? product.isBackorderAllowed;
+    product.images = productData.images ?? product.images;
+
+    if (productData.digitalDetails) {
+      product.downloadUrl =
+        productData.digitalDetails.download?.url ?? product.downloadUrl;
+      product.downloadLimit =
+        productData.digitalDetails.download?.downloadLimit ??
+        product.downloadLimit;
+    }
+
+    if (productData.physicalDetails) {
+      product.weight = productData.physicalDetails.weight ?? product.weight;
+      product.dimensions =
+        productData.physicalDetails.dimensions ?? product.dimensions;
+    }
+
+    if (productData.subscriptionDetails) {
+      product.billingInterval =
+        (productData.subscriptionDetails.billing?.interval as
+          | "monthly"
+          | "yearly") ??
+        (product.billingInterval || "monthly");
+      product.trialPeriodDays =
+        productData.subscriptionDetails.billing?.trialDays ??
+        product.trialPeriodDays;
+    }
+
+    if (productData.eventDetails) {
+      product.eventType =
+        productData.eventDetails.eventType ?? product.eventType;
+      product.eventStartDate =
+        productData.eventDetails.eventDetails?.startDate ??
+        product.eventStartDate;
+      product.eventEndDate =
+        productData.eventDetails.eventDetails?.endDate ?? product.eventEndDate;
+      product.venueName =
+        productData.eventDetails.eventDetails?.venueName ?? product.venueName;
+      product.eventOnlineUrl =
+        productData.eventDetails.eventDetails?.onlineUrl ??
+        product.eventOnlineUrl;
+      product.eventLocation =
+        productData.eventDetails.eventDetails?.location ??
+        product.eventLocation;
+      product.eventCapacity =
+        productData.eventDetails.eventDetails?.capacity ??
+        product.eventCapacity;
+      product.eventRegisteredCount =
+        productData.eventDetails.eventDetails?.registeredCount ??
+        product.eventRegisteredCount;
+      product.eventWaitlistEnabled =
+        productData.eventDetails.eventDetails?.waitlistEnabled ??
+        product.eventWaitlistEnabled;
+    }
 
     await product.save();
 
