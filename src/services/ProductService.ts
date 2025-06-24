@@ -10,10 +10,11 @@ export class ProductService {
    */
   async createProduct(productData: ICreateProduct): Promise<Product> {
     // Generate slug from name
-    const slug = productData.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+    const slug =
+      productData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "") + Math.random().toString(36).substring(2, 9);
 
     // Set default status if not provided
     const product = Product.create();
