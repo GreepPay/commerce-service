@@ -37,10 +37,19 @@ export class TicketService {
     const productMap = new Map(products.map((p) => [p.id, p]));
 
     const ticketCreations = sale.items.flatMap((item) => {
-      const product = productMap.get(parseInt(item.productId));
+      const product = productMap.get(Number(item.productId));
       if (!product || product.type !== ProductType.EVENT) return [];
 
-      const variantLabel = item.name.split(" - ")[1] || "Regular";
+      // Get variant SKU from product.variants based on variantId
+      let variantLabel = "Regular";
+      if (item.variantId && Array.isArray(product.variants)) {
+        const matchedVariant = product.variants.find(
+          (v) => v.id === item.variantId
+        );
+        if (matchedVariant) {
+          variantLabel = matchedVariant.sku || "Regular";
+        }
+      }
 
       return Array.from({ length: item.quantity }).map(() =>
         entityManager.save(
