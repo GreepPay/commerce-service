@@ -148,7 +148,7 @@ export class OrderService {
         if (eventProducts.length > 0) {
           for (const sale of sales) {
             const hasEvent = sale.items.some((item) =>
-              eventProducts.some((ep) => ep.id.toString() === item.productId)
+              eventProducts.some((ep) => ep.id.toString() === item.productId.toString())
             );
             if (hasEvent) {
               const generated = await this.ticketService.createFromSale(
