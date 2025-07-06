@@ -34,7 +34,7 @@ export class OrderService {
   }
 
   /**
-   * Creates a new order with related sale, delivery, and tickets (if applicable).
+   * Creates a new order with related sale, optional delivery, and tickets (if applicable).
    * Assumes controller handles all exceptions.
    * @param orderData - Order creation input
    * @returns Structured HttpResponseType
@@ -95,8 +95,8 @@ export class OrderService {
           appliedDiscounts: firstSale.appliedDiscounts,
           taxDetails: firstSale.taxDetails,
           status: OrderStatus.PENDING,
-          shippingAddress: orderData.shippingAddress,
-          billingAddress: orderData.billingAddress,
+          shippingAddress: orderData.shippingAddress || undefined,
+          billingAddress: orderData.billingAddress || undefined,
           paymentMethod: firstSale.paymentDetails.method,
           paymentStatus: PaymentStatus.PENDING,
           statusHistory: [
@@ -119,36 +119,46 @@ export class OrderService {
           await manager.save(sale);
         }
 
-        // Create delivery
-        const delivery = Delivery.create({
-          order: savedOrder,
-          status: DeliveryStatus.PENDING,
-          estimatedDeliveryDate: new Date(Date.now() + 7 * 86400000), // +7 days
-          deliveryAddress: JSON.stringify(orderData.shippingAddress),
-          trackingNumber: `TRK-${Date.now()}`,
-          trackingUpdates: [
-            {
-              timestamp: new Date(),
-              status: DeliveryStatus.PENDING,
-              location: "Processing Center",
-            },
-          ],
-        });
-
-        const savedDelivery = await manager.save(delivery);
-
         // Fetch event-type products
         const eventProducts = await Product.findBy({
           id: In(orderData.items.map((item) => item.productId)),
           type: ProductType.EVENT,
         });
 
-        // Handle ticket creation per sale that contains event products
+        // ✅ Determine if all products are event-type
+        const allProductIds = orderData.items.map((item) => item.productId);
+        const eventProductIds = eventProducts.map((ep) => ep.id.toString());
+        const isAllEventProducts = allProductIds.every((id) =>
+          eventProductIds.includes(id.toString())
+        );
+
+        let savedDelivery = null;
+
+        // ✅ Only create delivery for non-event orders
+        if (!isAllEventProducts) {
+          const delivery = Delivery.create({
+            order: savedOrder,
+            status: DeliveryStatus.PENDING,
+            estimatedDeliveryDate: new Date(Date.now() + 7 * 86400000),
+            deliveryAddress: JSON.stringify(orderData.shippingAddress || {}),
+            trackingNumber: `TRK-${Date.now()}`,
+            trackingUpdates: [
+              {
+                timestamp: new Date(),
+                status: DeliveryStatus.PENDING,
+                location: "Processing Center",
+              },
+            ],
+          });
+
+          savedDelivery = await manager.save(delivery);
+        }
+
         const tickets: any[] = [];
         if (eventProducts.length > 0) {
           for (const sale of sales) {
             const hasEvent = sale.items.some((item) =>
-              eventProducts.some((ep) => ep.id.toString() === item.productId.toString())
+              eventProductIds.includes(item.productId.toString())
             );
             if (hasEvent) {
               const generated = await this.ticketService.createFromSale(
@@ -163,7 +173,7 @@ export class OrderService {
         return {
           order: savedOrder,
           sale: sales,
-          delivery: savedDelivery,
+          ...(savedDelivery && { delivery: savedDelivery }),
           ...(tickets.length > 0 && { tickets }),
         };
       }
