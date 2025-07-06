@@ -4,8 +4,8 @@ export interface Order {
   customerId: number;
   saleId?: string;
   items: OrderItem[];
-  shippingAddress: Address;
-  billingAddress: Address;
+  shippingAddress?: Address;
+  billingAddress?: Address;
   status?: OrderStatus;
   statusHistory?: StatusUpdate[];
   paymentMethod?: string;

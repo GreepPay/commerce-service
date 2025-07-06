@@ -34,7 +34,7 @@ export class Order extends BaseModel {
   @Column()
   customerId!: number;
 
-    @OneToMany("Sale", "order", {
+  @OneToMany("Sale", "order", {
     cascade: false,
   })
   sales!: Sale[];
