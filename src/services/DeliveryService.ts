@@ -19,6 +19,7 @@ export class DeliveryService {
     delivery.deliveryAddress = deliveryData.deliveryAddress;
     delivery.metadata = deliveryData.metadata;
     delivery.trackingUpdates = deliveryData.trackingUpdates;
+    delivery.type = deliveryData.type || "order"; // Set delivery type
     delivery.order = order;
 
     await delivery.save();
@@ -39,6 +40,7 @@ export class DeliveryService {
     price: number;
     estimatedDeliveryDate: Date;
     metadata: any;
+    type: "order" | "custom";
   }): Promise<Delivery> {
     const trackingNumber = this.generateTrackingNumber();
 
@@ -52,6 +54,7 @@ export class DeliveryService {
     delivery.price = data.price;
     delivery.businessId = data.businessId;
     delivery.customerId = data.customerId;
+    delivery.type = data.type; // Set delivery type
     delivery.metadata = {
       ...data.metadata,
       source: "delivery-chat",

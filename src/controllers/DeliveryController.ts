@@ -18,11 +18,15 @@ export class DeliveryController {
         { field: "trackingNumber", type: "string", required: true },
         { field: "status", type: "string", required: true },
         { field: "estimatedDeliveryDate", type: "string", required: false },
+        { field: "type", type: "string", required: false }, // Add type validation
       ];
 
       const deliveryData = (await request.validate(
         validations
       )) as CreateDelivery;
+
+      // Set default type for regular deliveries
+      deliveryData.type = (deliveryData.type as "order" | "custom") || "order";
 
       const result = await this.deliveryService.createDelivery(deliveryData);
 
@@ -123,6 +127,7 @@ export class DeliveryController {
         price,
         estimatedDeliveryDate: new Date(estimatedDeliveryDate),
         metadata: metadata || {},
+        type: "custom", // Explicitly set type as custom
       });
 
       return HttpResponse.success(

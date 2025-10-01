@@ -55,4 +55,7 @@ export class Delivery extends BaseModel {
 
   @Column({ type: "int", nullable: true })
   customerId?: number;
+
+  @Column({ type: "varchar", length: 10, default: "order" })
+  type!: "order" | "custom";
 }

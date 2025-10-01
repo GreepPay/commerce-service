@@ -31,6 +31,7 @@ export interface Delivery {
   deliveryAttempts: number;
   trackingUpdates: TrackingEvent[];
   recipientSignature?: string; // Base64 encoded image
+  type: "order" | "custom"; // Add type field
 }
 
 export interface Carrier {
@@ -59,4 +60,5 @@ export interface CreateDelivery {
   deliveryAttempts: number;
   trackingUpdates: TrackingEvent[];
   recipientSignature?: string;
+  type: "order" | "custom"; // Add type field
 }
