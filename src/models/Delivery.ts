@@ -1,13 +1,13 @@
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
 import { BaseModel, getDateTimeType, getJsonType } from "./BaseModel";
-import type { Order as Ordertype} from "./Order";
+import type { Order as Ordertype } from "./Order";
 import { Order } from "./Order";
 
 @Entity()
 export class Delivery extends BaseModel {
-  @ManyToOne(() => Order, { nullable: false })
+  @ManyToOne(() => Order, { nullable: true })
   @JoinColumn()
-  order!: Ordertype;
+  order?: Ordertype;
 
   @Column({ type: "varchar", length: 255 })
   trackingNumber!: string;
@@ -40,4 +40,19 @@ export class Delivery extends BaseModel {
     status: string;
     notes?: string;
   }>;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  pickupAddress?: string;
+
+  @Column({ type: "varchar", length: 20, nullable: true })
+  urgency?: string; // low, medium, high
+
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
+  price?: number;
+
+  @Column({ type: "int", nullable: true })
+  businessId?: number;
+
+  @Column({ type: "int", nullable: true })
+  customerId?: number;
 }

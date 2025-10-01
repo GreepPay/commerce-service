@@ -83,4 +83,112 @@ export class DeliveryController {
       );
     }
   }
+
+  /**
+   * Create a custom delivery for chat-bot delivery system
+   */
+  async createCustomDelivery(request: BunRequest) {
+    try {
+      const validations: Validation[] = [
+        { field: "customerId", type: "number", required: false },
+        { field: "businessId", type: "number", required: false },
+        { field: "itemDescription", type: "string", required: false },
+        { field: "pickupAddress", type: "string", required: true },
+        { field: "deliveryAddress", type: "string", required: true },
+        { field: "urgency", type: "string", required: false },
+        { field: "price", type: "number", required: true },
+        { field: "estimatedDeliveryDate", type: "string", required: true },
+        { field: "metadata", type: "object", required: false },
+      ];
+
+      const {
+        customerId,
+        businessId,
+        itemDescription,
+        pickupAddress,
+        deliveryAddress,
+        urgency,
+        price,
+        estimatedDeliveryDate,
+        metadata,
+      } = await request.validate(validations);
+
+      const delivery = await this.deliveryService.createCustomDelivery({
+        customerId,
+        businessId,
+        itemDescription,
+        pickupAddress,
+        deliveryAddress,
+        urgency: urgency || "medium",
+        price,
+        estimatedDeliveryDate: new Date(estimatedDeliveryDate),
+        metadata: metadata || {},
+      });
+
+      return HttpResponse.success(
+        "Custom delivery created successfully",
+        {
+          id: delivery.id,
+          trackingNumber: delivery.trackingNumber,
+          status: delivery.status,
+          customerId: delivery.customerId,
+          businessId: delivery.businessId,
+          pickupAddress: delivery.pickupAddress,
+          deliveryAddress: delivery.deliveryAddress,
+          urgency: delivery.urgency,
+          price: delivery.price,
+          estimatedDeliveryDate: delivery.estimatedDeliveryDate,
+          metadata: delivery.metadata,
+        },
+        201
+      );
+    } catch (error: any) {
+      return HttpResponse.failure(
+        error.message || "Failed to create custom delivery",
+        error.status || 500
+      );
+    }
+  }
+
+  /**
+   * Business accepts a custom delivery
+   */
+  async acceptDeliveryByBusiness(request: BunRequest) {
+    try {
+      const validations: Validation[] = [
+        { field: "businessId", type: "number", required: true },
+      ];
+
+      const { id } = request.params;
+      const { businessId } = await request.validate(validations);
+
+      const delivery = await this.deliveryService.acceptDeliveryByBusiness(
+        id,
+        businessId
+      );
+
+      return HttpResponse.success(
+        "Delivery accepted by business successfully",
+        {
+          id: delivery.id,
+          trackingNumber: delivery.trackingNumber,
+          status: delivery.status,
+          businessId: delivery.businessId,
+          customerId: delivery.customerId,
+          pickupAddress: delivery.pickupAddress,
+          deliveryAddress: delivery.deliveryAddress,
+          urgency: delivery.urgency,
+          price: delivery.price,
+          estimatedDeliveryDate: delivery.estimatedDeliveryDate,
+          metadata: delivery.metadata,
+          trackingUpdates: delivery.trackingUpdates,
+        }
+      );
+    } catch (error: any) {
+      return HttpResponse.failure(
+        error.message || "Failed to accept delivery",
+        error.status || 500
+      );
+    }
+  }
 }

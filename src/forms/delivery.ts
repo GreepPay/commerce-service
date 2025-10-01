@@ -2,6 +2,7 @@
 export enum DeliveryStatus {
   // Initial states
   PENDING = "pending",
+  CONFIRMED = "confirmed",
   PROCESSING = "processing",
   LABEL_CREATED = "label_created",
 
