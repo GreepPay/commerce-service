@@ -127,19 +127,7 @@ export class DeliveryController {
 
       return HttpResponse.success(
         "Custom delivery created successfully",
-        {
-          id: delivery.id,
-          trackingNumber: delivery.trackingNumber,
-          status: delivery.status,
-          customerId: delivery.customerId,
-          businessId: delivery.businessId,
-          pickupAddress: delivery.pickupAddress,
-          deliveryAddress: delivery.deliveryAddress,
-          urgency: delivery.urgency,
-          price: delivery.price,
-          estimatedDeliveryDate: delivery.estimatedDeliveryDate,
-          metadata: delivery.metadata,
-        },
+        delivery,
         201
       );
     } catch (error: any) {
@@ -169,20 +157,7 @@ export class DeliveryController {
 
       return HttpResponse.success(
         "Delivery accepted by business successfully",
-        {
-          id: delivery.id,
-          trackingNumber: delivery.trackingNumber,
-          status: delivery.status,
-          businessId: delivery.businessId,
-          customerId: delivery.customerId,
-          pickupAddress: delivery.pickupAddress,
-          deliveryAddress: delivery.deliveryAddress,
-          urgency: delivery.urgency,
-          price: delivery.price,
-          estimatedDeliveryDate: delivery.estimatedDeliveryDate,
-          metadata: delivery.metadata,
-          trackingUpdates: delivery.trackingUpdates,
-        }
+        delivery
       );
     } catch (error: any) {
       return HttpResponse.failure(
