@@ -5,7 +5,7 @@
 // ========================
 
 export interface BaseProduct {
-  id: string; // UUIDv4
+  id: number;
   sku: string;
   name: string;
   description: string;
@@ -16,19 +16,42 @@ export interface BaseProduct {
   taxCode: string;
   categoryIds: string[];
   tags: string[];
+  images?: string[];
+  inventoryCount?: number;
+  stockThreshold?: number;
+  isBackorderAllowed?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface ICreateProduct {
   name: string;
+  sku: string;
   description: string;
   type: ProductType;
   price: number;
   status: ProductStatus;
-  currency: string; // ISO 4217
+  currency: string;
   categoryIds: string[];
   tags: string[];
+  inventoryCount?: number;
+  stockThreshold?: number;
+  isBackorderAllowed?: boolean;
+  businessId: number;
+  images?: {
+    url: string;
+    altText: string;
+    isPrimary: boolean;
+  }[];
+  variants?: ProductVariant[];
+  physicalDetails?: PhysicalProduct;
+  digitalDetails?: DigitalProduct;
+  subscriptionDetails?: SubscriptionProduct;
+  eventDetails?: EventProduct;
+}
+
+export interface IUpdateProduct extends Partial<ICreateProduct> {
+  id: number;
 }
 
 // ========================
@@ -82,6 +105,31 @@ export interface SubscriptionProduct {
   };
 }
 
+export interface EventProduct {
+  type: "event";
+  eventType: EventType;
+  eventDetails: {
+    startDate: Date;
+    endDate: Date;
+    venueName?: string;
+    onlineUrl?: string;
+    location?: {
+      address: string;
+      city: string;
+      state?: string;
+      country: string;
+      postalCode?: string;
+      coordinates?: {
+        lat: number;
+        lng: number;
+      };
+    };
+    capacity?: number;
+    registeredCount: number;
+    waitlistEnabled: boolean;
+  };
+}
+
 // ========================
 // Variant Support
 // ========================
@@ -92,7 +140,7 @@ export interface ProductVariant {
   attributes: Record<string, string>; // { color: 'red', size: 'xl' }
   priceAdjustment: number;
   inventory?: number; // Overrides parent stock
-  images?: string[];
+  images: string;
 }
 
 // ========================
@@ -103,6 +151,7 @@ export enum ProductType {
   PHYSICAL = "physical",
   DIGITAL = "digital",
   SUBSCRIPTION = "subscription",
+  EVENT = "event",
 }
 
 export enum ProductStatus {
@@ -130,78 +179,8 @@ export enum LicenseType {
   PERPETUAL = "perpetual",
 }
 
-// ========================
-// Validation Rules
-// ========================
-
-/*
-  1. SKU must be unique per product type
-  2. Physical products require inventory count
-  3. Digital products require download URL
-  4. Subscription products require billing interval
-  5. Price must be ≥ 0
-  6. Variant SKUs must be unique within parent product
-  */
-
-// ========================
-// Relationships
-// ========================
-
-/*
-  2. Many-to-Many: Product -> Categories
-  3. One-to-One: Product -> Inventory
-  4. Many-to-Many: Product -> Orders (through OrderItems)
-  */
-
-// ========================
-// API Integration
-// ========================
-
-/*
-  GET /products/{id}
-  POST /products
-    - Body: ProductCreateRequest
-  PATCH /products/{id}/inventory
-    - Body: { adjustment: number, reason: string }
-  GET /products/search?query=...
-  */
-
-// ========================
-// Database Schema
-// ========================
-
-/*
-  Table: products
-  - id (UUID PK)
-  - sku (VARCHAR UNIQUE)
-  - type (ENUM)
-  - status (ENUM)
-  - price (DECIMAL)
-  - currency (CHAR(3))
-  - metadata (JSONB) - type-specific fields
-  - created_at (TIMESTAMP)
-  - updated_at (TIMESTAMP)
-  
- Table: product_variants
-- id (UUID PK)
-- product_id (UUID FK)
-- sku (VARCHAR)
-- attributes (JSONB)
-- price_adjustment (DECIMAL)
-
-Table: product_types
-- id (SERIAL PK)
-- name (VARCHAR)
-- schema_def (JSONB) - validation rules
-*/
-
-// ========================
-// Indexes
-// ========================
-
-/*
-1. products(sku) - Unique
-2. products(type, status) - Composite
-3. product_variants(product_id)
-4. products(price) - Range queries
-*/
+export enum EventType {
+  ONLINE = "online",
+  OFFLINE = "offline",
+  HYBRID = "hybrid",
+}

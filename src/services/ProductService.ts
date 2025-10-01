@@ -1,126 +1,226 @@
-import { Product, ProductType } from "../models/Product";
-import HttpResponse, { type HttpResponseType } from "../common/HttpResponse";
+import { Product } from "../models/Product";
 import type { ICreateProduct } from "../forms/products";
 
 export class ProductService {
-  async createProduct(productData: ICreateProduct): Promise<HttpResponseType> {
-    try {
-      // Generate slug from name
-      const slug = productData.name
+  /**
+   * Creates a new product with a slug generated from the product name.
+   * If the status is not provided, defaults it to 'active'.
+   * @param productData - Data used to create the product
+   * @returns The created Product entity or an error response
+   */
+  async createProduct(productData: ICreateProduct): Promise<Product> {
+    // Generate slug from name
+    const slug =
+      productData.name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
+        .replace(/(^-|-$)/g, "") + Math.random().toString(36).substring(2, 9);
 
-      // Set default status if not provided
-      const product = Product.create({
-        ...productData,
-        slug,
-        status: productData.status || "active",
-      });
+    // Set default status if not provided
+    const product = Product.create();
 
-      await product.save();
-      return HttpResponse.success("Product created successfully", product, 201);
-    } catch (error) {
-      console.log({ error });
-      return HttpResponse.failure("Failed to create product", 400);
+    product.slug = slug;
+    product.status = productData.status || "active";
+    product.businessId = productData.businessId;
+    product.sku =
+      productData.sku || `SKU-${Math.random().toString(36).substring(2, 9)}`;
+    product.name = productData.name || "";
+    product.description = productData.description || "";
+    product.price = productData.price || 0;
+    product.currency = productData.currency || "USD";
+    product.type = productData.type || "physical";
+    product.variants = productData.variants?.length ? productData.variants : [];
+    product.inventoryCount = productData.inventoryCount || 0;
+    product.stockThreshold = productData.stockThreshold || 0;
+    product.isBackorderAllowed = productData.isBackorderAllowed || false;
+    product.images = productData.images || [];
+
+    // Digital products
+    if (productData.digitalDetails) {
+      product.downloadUrl = productData.digitalDetails.download.url;
+      product.downloadLimit = productData.digitalDetails.download.downloadLimit;
     }
+
+    // Physical products
+    if (productData.physicalDetails) {
+      product.weight = productData.physicalDetails.weight;
+      product.dimensions = productData.physicalDetails.dimensions;
+    }
+
+    // Subscription products
+    if (productData.subscriptionDetails) {
+      product.billingInterval =
+        (productData.subscriptionDetails.billing.interval as
+          | "monthly"
+          | "yearly") || "monthly";
+      product.trialPeriodDays =
+        productData.subscriptionDetails.billing.trialDays || 0;
+    }
+
+    // Event products
+    if (productData.eventDetails) {
+      product.eventType = productData.eventDetails.eventType;
+      product.eventStartDate = productData.eventDetails.eventDetails.startDate;
+      product.eventEndDate = productData.eventDetails.eventDetails.endDate;
+      product.venueName = productData.eventDetails.eventDetails.venueName || "";
+      product.eventOnlineUrl =
+        productData.eventDetails.eventDetails.onlineUrl || "";
+      product.eventLocation = productData.eventDetails.eventDetails.location;
+      product.eventCapacity =
+        productData.eventDetails.eventDetails.capacity || 0;
+      product.eventRegisteredCount =
+        productData.eventDetails.eventDetails.registeredCount || 0;
+      product.eventWaitlistEnabled =
+        productData.eventDetails.eventDetails.waitlistEnabled || false;
+    }
+
+    await product.save();
+
+    return product;
   }
 
-  async getProductById(id: string): Promise<HttpResponseType> {
-    try {
-      const product = await Product.findOneBy({ id });
-      if (!product) {
-        return HttpResponse.notFound("Product not found");
-      }
-      return HttpResponse.success("Product retrieved successfully", product);
-    } catch (error) {
-      return HttpResponse.failure("Failed to retrieve product", 400);
-    }
-  }
-
-  async getAllProducts(): Promise<HttpResponseType> {
-    try {
-      const products = await Product.find();
-      return HttpResponse.success("Products retrieved successfully", products);
-    } catch (error) {
-      return HttpResponse.failure("Failed to retrieve products", 400);
-    }
-  }
-
+  /**
+   * Updates an existing product with the given partial product data.
+   * Returns a 404 response if the product is not found.
+   * @param id - ID of the product to update
+   * @param productData - Partial data to update the product
+   * @returns The updated Product entity or an error response
+   */
   async updateProduct(
-    id: string,
-    productData: Partial<ICreateProduct>
-  ): Promise<HttpResponseType> {
-    try {
-      const product = await Product.findOneBy({ id });
-      if (!product) {
-        return HttpResponse.notFound("Product not found");
-      }
-      Object.assign(product, productData);
-      await product.save();
-      return HttpResponse.success("Product updated successfully", product);
-    } catch (error) {
-      return HttpResponse.failure("Failed to update product", 400);
+    id: number,
+    productData: Partial<ICreateProduct>,
+  ): Promise<Product> {
+    const product = await Product.findOne({
+      where: { id },
+    });
+
+    if (!product) {
+      throw {
+        status: 404,
+        message: "Product not found",
+      };
     }
+
+    product.businessId = productData.businessId ?? product.businessId;
+    product.sku = productData.sku ?? product.sku;
+    product.name = productData.name ?? product.name;
+    product.description = productData.description ?? product.description;
+    product.price = productData.price ?? product.price;
+    product.currency = productData.currency ?? product.currency;
+    product.type = productData.type ?? product.type;
+    product.variants = productData.variants ?? product.variants;
+    product.inventoryCount =
+      productData.inventoryCount ?? product.inventoryCount;
+    product.stockThreshold =
+      productData.stockThreshold ?? product.stockThreshold;
+    product.isBackorderAllowed =
+      productData.isBackorderAllowed ?? product.isBackorderAllowed;
+    product.images = productData.images ?? product.images;
+
+    if (productData.digitalDetails) {
+      product.downloadUrl =
+        productData.digitalDetails.download?.url ?? product.downloadUrl;
+      product.downloadLimit =
+        productData.digitalDetails.download?.downloadLimit ??
+        product.downloadLimit;
+    }
+
+    if (productData.physicalDetails) {
+      product.weight = productData.physicalDetails.weight ?? product.weight;
+      product.dimensions =
+        productData.physicalDetails.dimensions ?? product.dimensions;
+    }
+
+    if (productData.subscriptionDetails) {
+      product.billingInterval =
+        (productData.subscriptionDetails.billing?.interval as
+          | "monthly"
+          | "yearly") ??
+        (product.billingInterval || "monthly");
+      product.trialPeriodDays =
+        productData.subscriptionDetails.billing?.trialDays ??
+        product.trialPeriodDays;
+    }
+
+    if (productData.eventDetails) {
+      product.eventType =
+        productData.eventDetails.eventType ?? product.eventType;
+      product.eventStartDate =
+        productData.eventDetails.eventDetails?.startDate ??
+        product.eventStartDate;
+      product.eventEndDate =
+        productData.eventDetails.eventDetails?.endDate ?? product.eventEndDate;
+      product.venueName =
+        productData.eventDetails.eventDetails?.venueName ?? product.venueName;
+      product.eventOnlineUrl =
+        productData.eventDetails.eventDetails?.onlineUrl ??
+        product.eventOnlineUrl;
+      product.eventLocation =
+        productData.eventDetails.eventDetails?.location ??
+        product.eventLocation;
+      product.eventCapacity =
+        productData.eventDetails.eventDetails?.capacity ??
+        product.eventCapacity;
+      product.eventRegisteredCount =
+        productData.eventDetails.eventDetails?.registeredCount ??
+        product.eventRegisteredCount;
+      product.eventWaitlistEnabled =
+        productData.eventDetails.eventDetails?.waitlistEnabled ??
+        product.eventWaitlistEnabled;
+    }
+
+    await product.save();
+
+    return product;
   }
 
-  async deleteProduct(id: string): Promise<HttpResponseType> {
-    try {
-      const result = await Product.delete(id);
-      if (result.affected === 0) {
-        return HttpResponse.notFound("Product not found");
-      }
-      return HttpResponse.success("Product deleted successfully");
-    } catch (error) {
-      return HttpResponse.failure("Failed to delete product", 400);
+  /**
+   * Deletes a product by its ID.
+   * Returns true if deletion was successful or throws a 404 error if not found.
+   * @param id - ID of the product to delete
+   * @returns Boolean indicating success
+   */
+  async deleteProduct(id: number): Promise<boolean> {
+    const result = await Product.delete(id);
+
+    if (result.affected && result.affected > 0) {
+      return true;
     }
+
+    throw {
+      status: 404,
+      message: "Product not found",
+    };
   }
 
-  async adjustInventory(
-    productId: string,
-    count: number
-  ): Promise<HttpResponseType> {
-    try {
-      const product = await Product.findOneBy({ id: productId });
-      if (!product) {
-        return HttpResponse.notFound("Product not found");
-      }
-
-      product.inventoryCount = (product.inventoryCount || 0) + count;
-      await product.save();
-
-      return HttpResponse.success("Inventory adjusted successfully", product);
-    } catch (error) {
-      return HttpResponse.failure("Failed to adjust inventory", 400);
+  /**
+   * Adjusts the inventory count of a product.
+   * Adds the given count to the existing inventory count.
+   * Returns a 404 response if the product is not found.
+   * @param productId - ID of the product to adjust inventory for
+   * @param count - Number to add (or subtract if negative) from inventory
+   * @returns The updated Product entity or an error response
+   */
+  async adjustInventory(productId: number, count: number): Promise<Product> {
+    const product = await Product.findOne({ where: { id: productId } });
+    if (!product) {
+      throw {
+        status: 404,
+        message: "Product not found",
+      };
     }
-  }
 
-  async checkAvailability(productId: string): Promise<HttpResponseType> {
-    try {
-      const product = await Product.findOneBy({ id: productId });
-      if (!product) {
-        return HttpResponse.notFound("Product not found");
-      }
-
-      return HttpResponse.success("Product availability checked", {
-        productId: product.id,
-        available:
-          product.inventoryCount !== undefined && product.inventoryCount > 0,
-      });
-    } catch (error) {
-      return HttpResponse.failure("Failed to check availability", 400);
+    const newCount = (product.inventoryCount || 0) + count;
+    if (newCount < 0) {
+      throw {
+        status: 400,
+        message: "Insufficient inventory",
+      };
     }
-  }
 
-  async getProductTypes(): Promise<HttpResponseType> {
-    try {
-      const productTypes = Object.values(ProductType);
-      return HttpResponse.success(
-        "Product types retrieved successfully",
-        productTypes
-      );
-    } catch (error) {
-      return HttpResponse.failure("Failed to retrieve product types", 400);
-    }
+    product.inventoryCount = newCount;
+    await product.save();
+
+    return product;
   }
 }

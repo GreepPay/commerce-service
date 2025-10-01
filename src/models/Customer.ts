@@ -4,33 +4,33 @@ import { Order } from "./Order";
 
 @Entity()
 export class Customer extends BaseModel {
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   firstName!: string;
 
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   lastName!: string;
 
-  @Column({ unique: true })
+  @Column({ type: "varchar", length: 255, unique: true })
   email!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 20, nullable: true })
   phoneNumber?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   address?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   city?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   state?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 20, nullable: true })
   zipCode?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   country?: string;
 
-  @OneToMany(() => Order, (order) => order.customer)
+  @OneToMany(() => Order, (order) => order.customerId)
   orders!: Order[];
 }

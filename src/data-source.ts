@@ -1,5 +1,10 @@
-import { DataSource } from "typeorm";
+import "reflect-metadata";
+import pkg from "typeorm";
+const { DataSource } = pkg;
+import dotenv from "dotenv";
 import fs from "fs";
+
+dotenv.config();
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -8,11 +13,9 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  synchronize: true,
+  schema: "commerce_service",
+  synchronize: false,
   logging: true,
-  entities: [],
-  // entities: ["src/models/**/*.ts"],
-  subscribers: [],
   ssl:
     process.env.DB_USE_SSL === "true"
       ? {
@@ -22,5 +25,10 @@ export const AppDataSource = new DataSource({
             .toString(),
         }
       : false,
-  migrations: [],
+  entities: [
+    // "src/models/**/*.ts"
+
+  ],
+  subscribers: [],
+  migrations: ["src/database/migrations/*.ts"],
 });

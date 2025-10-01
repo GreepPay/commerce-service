@@ -22,18 +22,14 @@ class HttpResponse {
    * @param {any} data - Data to be returned
    * @param {number} status - HTTP status code
    */
-  static success(
-    message: string,
-    data: any = {},
-    status: number = 200
-  ): HttpResponseType {
+  static success(message: string, data: any = {}, status: number = 200): HttpResponseType {
     return {
       statusCode: status,
       body: {
         success: true,
         message,
         data,
-      },
+      }
     };
   }
 
@@ -48,8 +44,8 @@ class HttpResponse {
       body: {
         success: false,
         message,
-        error_code: status,
-      },
+        error_code: status
+      }
     };
   }
 
@@ -58,17 +54,14 @@ class HttpResponse {
    * @param {Record<string, any>} errors - Validation errors
    * @param {number} status - HTTP status code
    */
-  static validationFail(
-    errors: Record<string, any> = {},
-    status: number = 422
-  ): HttpResponseType {
+  static validationFail(errors: Record<string, any> = {}, status: number = 422): HttpResponseType {
     return {
       statusCode: status,
       body: {
         success: false,
-        message: "Validation failed",
-        errors,
-      },
+        message: 'Validation failed',
+        errors
+      }
     };
   }
 
@@ -79,15 +72,15 @@ class HttpResponse {
    * @param {number|null} expiresIn - Token expiration time
    */
   static respondWithToken(
-    token: string,
-    user: Record<string, any> = {},
+    token: string, 
+    user: Record<string, any> = {}, 
     expiresIn: number | null = null
   ): HttpResponseType {
     const response: ResponseBody = {
       success: true,
       user,
       access_token: token,
-      token_type: "bearer",
+      token_type: 'bearer'
     };
 
     if (expiresIn) {
@@ -96,7 +89,7 @@ class HttpResponse {
 
     return {
       statusCode: 200,
-      body: response,
+      body: response
     };
   }
 
@@ -104,7 +97,7 @@ class HttpResponse {
    * Return a not found response
    * @param {string} message - Not found message
    */
-  static notFound(message: string = "Resource not found"): HttpResponseType {
+  static notFound(message: string = 'Resource not found'): HttpResponseType {
     return this.failure(message, 404);
   }
 
@@ -112,7 +105,7 @@ class HttpResponse {
    * Return an unauthorized response
    * @param {string} message - Unauthorized message
    */
-  static unauthorized(message: string = "Unauthorized"): HttpResponseType {
+  static unauthorized(message: string = 'Unauthorized'): HttpResponseType {
     return this.failure(message, 401);
   }
 
@@ -120,7 +113,7 @@ class HttpResponse {
    * Return a forbidden response
    * @param {string} message - Forbidden message
    */
-  static forbidden(message: string = "Forbidden"): HttpResponseType {
+  static forbidden(message: string = 'Forbidden'): HttpResponseType {
     return this.failure(message, 403);
   }
 }

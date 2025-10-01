@@ -7,45 +7,6 @@ const controller = new ProductController();
 /**
  * @swagger
  * /v1/products:
- *   get:
- *     summary: Get all products
- *     tags: [Products]
- *     parameters:
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *         description: Filter products by category
- *       - in: query
- *         name: type
- *         schema:
- *           type: string
- *         description: Filter products by type
- *     responses:
- *       200:
- *         description: List of products retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
- *       400:
- *         description: Invalid request
- */
-router.add("GET", `/${APP_VERSION}/products`, async (request: BunRequest) => {
-  const result = await controller.getAllProducts(request);
-  return result;
-});
-
-/**
- * @swagger
- * /v1/products:
  *   post:
  *     summary: Create a new product
  *     tags: [Products]
@@ -57,29 +18,188 @@ router.add("GET", `/${APP_VERSION}/products`, async (request: BunRequest) => {
  *             type: object
  *             required:
  *               - name
- *               - sku
  *               - price
  *               - type
+ *               - currency
+ *               - businessId
+ *               - sku
  *             properties:
- *               name:
- *                 type: string
  *               sku:
+ *                 type: string
+ *                 description: Unique Stock Keeping Unit
+ *               name:
  *                 type: string
  *               description:
  *                 type: string
- *               price:
- *                 type: number
  *               type:
  *                 type: string
- *                 enum: [physical, digital, service]
- *               categories:
+ *                 enum: [physical, digital, subscription, event]
+ *               price:
+ *                 type: number
+ *               status:
+ *                 type: string
+ *                 enum: [draft, active, archived, discontinued, out_of_stock]
+ *               currency:
+ *                 type: string
+ *               categoryIds:
  *                 type: array
  *                 items:
  *                   type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     url:
+ *                       type: string
+ *                     altText:
+ *                       type: string
+ *                     isPrimary:
+ *                       type: boolean
+ *               businessId:
+ *                 type: number
  *               inventoryCount:
  *                 type: number
- *               metadata:
+ *                 description: Available quantity in stock
+ *               stockThreshold:
+ *                 type: number
+ *               isBackorderAllowed:
+ *                 type: boolean
+ *
+ *               # Physical-specific (optional)
+ *               physicalDetails:
  *                 type: object
+ *                 properties:
+ *                   type:
+ *                     type: string
+ *                   weight:
+ *                     type: number
+ *                   dimensions:
+ *                     type: object
+ *                     properties:
+ *                       length:
+ *                         type: number
+ *                       width:
+ *                         type: number
+ *                       height:
+ *                         type: number
+ *                   shippingClass:
+ *                     type: string
+ *                     enum: [standard, express, oversized]
+ *                   inventory:
+ *                     type: object
+ *                     properties:
+ *                       stock:
+ *                         type: number
+ *                       lowStockThreshold:
+ *                         type: number
+ *                       isBackorderAllowed:
+ *                         type: boolean
+ *
+ *               # Digital-specific (optional)
+ *               digitalDetails:
+ *                 type: object
+ *                 properties:
+ *                   type:
+ *                     type: string
+ *                   download:
+ *                     type: object
+ *                     properties:
+ *                       url:
+ *                         type: string
+ *                       accessExpiration:
+ *                         type: string
+ *                       downloadLimit:
+ *                         type: number
+ *                   license:
+ *                     type: object
+ *                     properties:
+ *                       key:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *                         enum: [single, multi, perpetual]
+ *                   fileInfo:
+ *                     type: object
+ *                     properties:
+ *                       size:
+ *                         type: number
+ *                       format:
+ *                         type: string
+ *
+ *               # Subscription-specific (optional)
+ *               subscriptionDetails:
+ *                 type: object
+ *                 properties:
+ *                   type:
+ *                     type: string
+ *                   billing:
+ *                     type: object
+ *                     properties:
+ *                       interval:
+ *                         type: string
+ *                         enum: [monthly, annual, custom]
+ *                       trialDays:
+ *                         type: number
+ *                       gracePeriod:
+ *                         type: number
+ *                   features:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                   renewal:
+ *                     type: object
+ *                     properties:
+ *                       price:
+ *                         type: number
+ *                       autoRenew:
+ *                         type: boolean
+ *
+ *               # Event-specific (optional)
+ *               eventType:
+ *                 type: string
+ *                 enum: [online, offline, hybrid]
+ *               eventDetails:
+ *                 type: object
+ *                 properties:
+ *                   startDate:
+ *                     type: string
+ *                   endDate:
+ *                     type: string
+ *                   venueName:
+ *                     type: string
+ *                   onlineUrl:
+ *                     type: string
+ *                   location:
+ *                     type: object
+ *                     properties:
+ *                       address:
+ *                         type: string
+ *                       city:
+ *                         type: string
+ *                       state:
+ *                         type: string
+ *                       country:
+ *                         type: string
+ *                       postalCode:
+ *                         type: string
+ *                       coordinates:
+ *                         type: object
+ *                         properties:
+ *                           lat:
+ *                             type: number
+ *                           lng:
+ *                             type: number
+ *                   capacity:
+ *                     type: number
+ *                   registeredCount:
+ *                     type: number
+ *                   waitlistEnabled:
+ *                     type: boolean
  *     responses:
  *       201:
  *         description: Product created successfully
@@ -88,40 +208,11 @@ router.add("GET", `/${APP_VERSION}/products`, async (request: BunRequest) => {
  */
 router.add("POST", `/${APP_VERSION}/products`, async (request: BunRequest) => {
   const result = await controller.createProduct(request);
-  return result;
+  return new Response(JSON.stringify(result.body), {
+    headers: { "Content-Type": "application/json" },
+    status: result.statusCode,
+  });
 });
-
-/**
- * @swagger
- * /v1/products/{id}:
- *   get:
- *     summary: Get product by ID
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Product ID
- *     responses:
- *       200:
- *         description: Product retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Product'
- *       404:
- *         description: Product not found
- */
-router.add(
-  "GET",
-  `/${APP_VERSION}/products/:id`,
-  async (request: BunRequest) => {
-    const result = await controller.getProductById(request);
-    return result;
-  }
-);
 
 /**
  * @swagger
@@ -166,7 +257,10 @@ router.add(
   `/${APP_VERSION}/products/:id`,
   async (request: BunRequest) => {
     const result = await controller.updateProduct(request);
-    return result;
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 
@@ -194,7 +288,10 @@ router.add(
   `/${APP_VERSION}/products/:id`,
   async (request: BunRequest) => {
     const result = await controller.deleteProduct(request);
-    return result;
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 
@@ -230,79 +327,14 @@ router.add(
  *         description: Product not found
  */
 router.add(
-  "PATCH",
+  "PUT",
   `/${APP_VERSION}/products/:id/inventory`,
   async (request: BunRequest) => {
-    return controller.adjustInventory(request);
-  }
-);
-
-/**
- * @swagger
- * /v1/products/{id}/availability:
- *   get:
- *     summary: Check real-time availability
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Product ID
- *     responses:
- *       200:
- *         description: Product availability status
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 available:
- *                   type: boolean
- *                 inventoryCount:
- *                   type: number
- *                 nextRestockDate:
- *                   type: string
- *                   format: date-time
- *       404:
- *         description: Product not found
- */
-router.add(
-  "GET",
-  `/${APP_VERSION}/products/:id/availability`,
-  async (request: BunRequest) => {
-    return controller.checkAvailability(request);
-  }
-);
-
-/**
- * @swagger
- * /v1/product-types:
- *   get:
- *     summary: List supported product types
- *     tags: [Products]
- *     responses:
- *       200:
- *         description: List of product types
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     type: string
- *                     enum: [physical, digital, service]
- */
-router.add(
-  "GET",
-  `/${APP_VERSION}/product-types`,
-  async (request: BunRequest) => {
-    return controller.getProductTypes(request);
+    const result = await controller.adjustInventory(request);
+    return new Response(JSON.stringify(result.body), {
+      headers: { "Content-Type": "application/json" },
+      status: result.statusCode,
+    });
   }
 );
 

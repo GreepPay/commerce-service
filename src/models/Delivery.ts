@@ -1,44 +1,61 @@
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
-import { BaseModel } from "./BaseModel";
-
-// Import Order here but use it as a type later
+import { BaseModel, getDateTimeType, getJsonType } from "./BaseModel";
+import type { Order as Ordertype } from "./Order";
 import { Order } from "./Order";
 
 @Entity()
 export class Delivery extends BaseModel {
-  @ManyToOne(() => Order, { nullable: false })
+  @ManyToOne(() => Order, { nullable: true })
   @JoinColumn()
-  order!: typeof Order;
+  order?: Ordertype;
 
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   trackingNumber!: string;
 
-  @Column()
+  @Column({ type: "varchar", length: 50 })
   status!: string; // e.g., pending, shipped, delivered, failed
 
-  @Column()
+  @Column({ type: getDateTimeType() })
   estimatedDeliveryDate!: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: getDateTimeType(), nullable: true })
   actualDeliveryDate?: Date;
 
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   deliveryAddress!: string;
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   metadata?: Record<string, any>;
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   trackingUpdates?: Array<{
     timestamp: Date;
     status: string;
     location?: string;
   }>;
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   deliveryAttempts?: Array<{
     attemptDate: Date;
     status: string;
     notes?: string;
   }>;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  pickupAddress?: string;
+
+  @Column({ type: "varchar", length: 20, nullable: true })
+  urgency?: string; // low, medium, high
+
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
+  price?: number;
+
+  @Column({ type: "int", nullable: true })
+  businessId?: number;
+
+  @Column({ type: "int", nullable: true })
+  customerId?: number;
+
+  @Column({ type: "varchar", length: 10, default: "order" })
+  type!: "order" | "custom";
 }

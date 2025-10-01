@@ -1,68 +1,162 @@
 import { Delivery } from "../models/Delivery";
-import HttpResponse, { type HttpResponseType } from "../common/HttpResponse";
+import { Order } from "../models/Order";
+import { DeliveryStatus, type CreateDelivery } from "../forms/delivery";
 
 export class DeliveryService {
-  async createDelivery(deliveryData: any): Promise<HttpResponseType> {
-    try {
-      const delivery = new Delivery();
-      Object.assign(delivery, deliveryData);
-      await delivery.save();
-      return HttpResponse.success("Delivery created successfully", delivery);
-    } catch (error) {
-      return HttpResponse.failure("Failed to create delivery", 400);
+  async createDelivery(deliveryData: CreateDelivery): Promise<Delivery> {
+    const order = await Order.findOne({
+      where: { id: parseInt(deliveryData.orderId) },
+    });
+
+    if (!order) {
+      throw { status: 404, message: "Order not found" };
     }
+
+    const delivery = Delivery.create();
+    delivery.trackingNumber = deliveryData.trackingNumber;
+    delivery.status = deliveryData.status;
+    delivery.estimatedDeliveryDate = deliveryData.estimatedDeliveryDate;
+    delivery.deliveryAddress = deliveryData.deliveryAddress;
+    delivery.metadata = deliveryData.metadata;
+    delivery.trackingUpdates = deliveryData.trackingUpdates;
+    delivery.type = deliveryData.type || "order"; // Set delivery type
+    delivery.order = order;
+
+    await delivery.save();
+    return delivery;
   }
 
-  async updateDeliveryStatus(deliveryId: string, status: string): Promise<HttpResponseType> {
-    try {
-      const delivery = await Delivery.findOneBy({ id: deliveryId });
-      if (!delivery) {
-        return HttpResponse.notFound("Delivery not found");
-      }
+  /**
+   * Creates a custom delivery for chat-bot delivery system
+   * Uses admin-set fixed pricing
+   */
+  async createCustomDelivery(data: {
+    customerId?: number;
+    businessId?: number;
+    itemDescription?: string;
+    pickupAddress: string;
+    deliveryAddress: string;
+    urgency: "low" | "medium" | "high";
+    price: number;
+    estimatedDeliveryDate: Date;
+    metadata: any;
+    type: "order" | "custom";
+  }): Promise<Delivery> {
+    const trackingNumber = this.generateTrackingNumber();
 
-      delivery.status = status;
-      await delivery.save();
-      return HttpResponse.success("Delivery status updated successfully", delivery);
-    } catch (error) {
-      return HttpResponse.failure("Failed to update delivery status", 400);
-    }
+    const delivery = Delivery.create();
+    delivery.trackingNumber = trackingNumber;
+    delivery.status = DeliveryStatus.PENDING;
+    delivery.pickupAddress = data.pickupAddress;
+    delivery.deliveryAddress = data.deliveryAddress;
+    delivery.estimatedDeliveryDate = data.estimatedDeliveryDate;
+    delivery.urgency = data.urgency;
+    delivery.price = data.price;
+    delivery.businessId = data.businessId;
+    delivery.customerId = data.customerId;
+    delivery.type = data.type; // Set delivery type
+    delivery.metadata = {
+      ...data.metadata,
+      source: "delivery-chat",
+      itemDescription: data.itemDescription,
+    };
+
+    await delivery.save();
+    return delivery;
   }
 
-  async getDeliveryDetails(deliveryId: string): Promise<HttpResponseType> {
-    try {
-      const delivery = await Delivery.findOneBy({ id: deliveryId });
-      if (!delivery) {
-        return HttpResponse.notFound("Delivery not found");
-      }
-      return HttpResponse.success("Delivery details retrieved successfully", delivery);
-    } catch (error) {
-      return HttpResponse.failure("Failed to retrieve delivery details", 400);
+  /**
+   * Business accepts delivery and updates businessId and status to confirmed
+   */
+  async acceptDeliveryByBusiness(
+    deliveryId: string,
+    businessId: number
+  ): Promise<Delivery> {
+    const delivery = await Delivery.findOne({
+      where: { id: parseInt(deliveryId) },
+    });
+
+    if (!delivery) {
+      throw { status: 404, message: "Delivery not found" };
     }
+
+    // Check if delivery is in a state that can be accepted
+    if (delivery.status !== DeliveryStatus.PENDING) {
+      throw {
+        status: 400,
+        message: `Cannot accept delivery with status: ${delivery.status}. Only pending deliveries can be accepted.`,
+      };
+    }
+
+    // Update businessId and status
+    delivery.businessId = businessId;
+    delivery.status = DeliveryStatus.CONFIRMED;
+
+    // Add tracking update
+    delivery.trackingUpdates = Array.isArray(delivery.trackingUpdates)
+      ? delivery.trackingUpdates
+      : [];
+
+    delivery.trackingUpdates.push({
+      timestamp: new Date(),
+      status: DeliveryStatus.CONFIRMED,
+      location: delivery.pickupAddress || "Business Location",
+    });
+
+    // Update metadata with acceptance info
+    delivery.metadata = {
+      ...delivery.metadata,
+      acceptedAt: new Date(),
+      acceptedByBusinessId: businessId,
+    };
+
+    await delivery.save();
+    return delivery;
   }
 
-  async getOrderDeliveries(orderId: string): Promise<HttpResponseType> {
-    try {
-      const deliveries = await Delivery.find({ where: { order: { id: orderId } } });
-      return HttpResponse.success("Deliveries retrieved successfully", deliveries);
-    } catch (error) {
-      return HttpResponse.failure("Failed to retrieve deliveries", 400);
+  async updateDeliveryStatus(
+    deliveryId: string,
+    status: string
+  ): Promise<Delivery> {
+    const delivery = await Delivery.findOne({
+      where: { id: parseInt(deliveryId) },
+    });
+
+    if (!delivery) {
+      throw { status: 404, message: "Delivery not found" };
     }
+
+    delivery.status = status;
+    await delivery.save();
+    return delivery;
   }
 
-  async updateTrackingInformation(deliveryId: string, trackingInfo: any): Promise<HttpResponseType> {
-    try {
-      const delivery = await Delivery.findOneBy({ id: deliveryId });
-      if (!delivery) {
-        return HttpResponse.notFound("Delivery not found");
-      }
+  async updateTrackingInformation(
+    deliveryId: string,
+    trackingInfo: any
+  ): Promise<Delivery> {
+    const delivery = await Delivery.findOne({
+      where: { id: parseInt(deliveryId) },
+    });
 
-      delivery.trackingUpdates = delivery.trackingUpdates || [];
-      delivery.trackingUpdates.push(trackingInfo);
-      await delivery.save();
-
-      return HttpResponse.success("Tracking information updated successfully", delivery);
-    } catch (error) {
-      return HttpResponse.failure("Failed to update tracking information", 400);
+    if (!delivery) {
+      throw { status: 404, message: "Delivery not found" };
     }
+
+    delivery.trackingUpdates = Array.isArray(delivery.trackingUpdates)
+      ? delivery.trackingUpdates
+      : [];
+
+    delivery.trackingUpdates.push(trackingInfo);
+    await delivery.save();
+
+    return delivery;
+  }
+
+  private generateTrackingNumber(): string {
+    const prefix = "DEL";
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substr(2, 4).toUpperCase();
+    return `${prefix}-${timestamp}-${random}`;
   }
 }

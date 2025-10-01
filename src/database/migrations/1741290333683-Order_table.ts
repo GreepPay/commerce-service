@@ -3,7 +3,7 @@ import type { MigrationInterface, QueryRunner } from "typeorm";
 import pkg from "typeorm";
 const { Table, TableForeignKey } = pkg;
 
-export class OrderTable1741290351990 implements MigrationInterface {
+export class OrderTable1741290333683 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
@@ -11,10 +11,10 @@ export class OrderTable1741290351990 implements MigrationInterface {
         columns: [
           {
             name: "id",
-            type: "uuid",
+            type: "int",
             isPrimary: true,
-            generationStrategy: "uuid",
-            default: "uuid_generate_v4()",
+            isGenerated: true,
+            generationStrategy: "increment",
           },
           { name: "orderNumber", type: "varchar", length: "255", isNullable: false },
           { name: "items", type: "jsonb", isNullable: false },
@@ -45,12 +45,12 @@ export class OrderTable1741290351990 implements MigrationInterface {
           { name: "statusHistory", type: "jsonb", isNullable: false },
           {
             name: "customerId",
-            type: "uuid",
+            type: "int",
             isNullable: false,
           },
           {
             name: "saleId",
-            type: "uuid",
+            type: "int",
             isNullable: false,
           },
           {
@@ -68,22 +68,22 @@ export class OrderTable1741290351990 implements MigrationInterface {
       }),
     );
 
-    await queryRunner.createForeignKey(
-      "order",
-      new TableForeignKey({
-        columnNames: ["customerId"],
-        referencedColumnNames: ["id"],
-        referencedTableName: "customer",
-        onDelete: "CASCADE",
-      }),
-    );
+    // await queryRunner.createForeignKey(
+    //   "order",
+    //   new TableForeignKey({
+    //     columnNames: ["customerId"],
+    //     referencedColumnNames: ["id"],
+    //     referencedTableName: "commerce_service.customer",
+    //     onDelete: "CASCADE",
+    //   }),
+    // );
 
     await queryRunner.createForeignKey(
       "order",
       new TableForeignKey({
         columnNames: ["saleId"],
         referencedColumnNames: ["id"],
-        referencedTableName: "sale",
+        referencedTableName: "commerce_service.sale",
         onDelete: "CASCADE",
       }),
     );

@@ -3,7 +3,7 @@ import type { MigrationInterface, QueryRunner } from "typeorm";
 import pkg from "typeorm";
 const { Table } = pkg;
 
-export class CustomerTable1741290388860 implements MigrationInterface {
+export class CustomerTable1741290310271 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
@@ -11,10 +11,10 @@ export class CustomerTable1741290388860 implements MigrationInterface {
         columns: [
           {
             name: "id",
-            type: "uuid",
+            type: "int",
             isPrimary: true,
-            generationStrategy: "uuid",
-            default: "uuid_generate_v4()",
+            isGenerated: true,
+            generationStrategy: "increment",
           },
           { name: "firstName", type: "varchar", length: "255", isNullable: false },
           { name: "lastName", type: "varchar", length: "255", isNullable: false },

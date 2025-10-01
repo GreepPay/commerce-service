@@ -2,6 +2,7 @@
 export enum DeliveryStatus {
   // Initial states
   PENDING = "pending",
+  CONFIRMED = "confirmed",
   PROCESSING = "processing",
   LABEL_CREATED = "label_created",
 
@@ -21,7 +22,6 @@ export enum DeliveryStatus {
 }
 
 export interface Delivery {
-  id: string;
   orderId: string;
   carrier: Carrier;
   trackingNumber: string;
@@ -31,6 +31,7 @@ export interface Delivery {
   deliveryAttempts: number;
   trackingUpdates: TrackingEvent[];
   recipientSignature?: string; // Base64 encoded image
+  type: "order" | "custom"; // Add type field
 }
 
 export interface Carrier {
@@ -45,4 +46,19 @@ export interface TrackingEvent {
   status: DeliveryStatus;
   description: string;
   carrierCode?: string; // Original carrier status code
+}
+
+export interface CreateDelivery {
+  metadata: any;
+  deliveryAddress: any;
+  orderId: string;
+  carrier: Carrier;
+  trackingNumber: string;
+  status: DeliveryStatus;
+  estimatedDeliveryDate: Date;
+  actualDelivery?: Date;
+  deliveryAttempts: number;
+  trackingUpdates: TrackingEvent[];
+  recipientSignature?: string;
+  type: "order" | "custom"; // Add type field
 }

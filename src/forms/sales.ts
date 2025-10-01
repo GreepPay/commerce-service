@@ -3,14 +3,16 @@ import { SaleStatus, PaymentMethod } from "../models/Sale";
 export interface CartItem {
   productId: string;
   quantity: number;
+  variantId?: string;
 }
 
 export interface ProcessSaleRequest {
-  customerId: string;
+  customerId: number;
   items: CartItem[];
   discountCodes?: string[];
   paymentMethod: PaymentMethod;
   metadata?: Record<string, any>;
+  currency?: string
 }
 
 export interface RefundRequest {
@@ -35,7 +37,7 @@ export interface TaxCalculationRequest {
 }
 
 export interface SaleFilters {
-  customerId?: string;
+  customerId?: number;
   status?: SaleStatus;
   fromDate?: Date;
   toDate?: Date;
@@ -56,7 +58,7 @@ export interface Discount {
   currentUsage?: number;
   productIds?: string[]; // Specific products this discount applies to
   categoryIds?: string[]; // Specific categories this discount applies to
-  customerIds?: string[]; // Specific customers who can use this discount
+  customerIds?: number[]; // Specific customers who can use this discount
   metadata?: Record<string, any>;
 }
 
@@ -78,6 +80,7 @@ export interface TaxRate {
 }
 
 export interface SaleItem {
+  variantId?: string;
   productId: string;
   sku: string;
   name: string;
@@ -91,10 +94,10 @@ export interface SaleItem {
 }
 
 export interface Sale {
-  id: string;
   transactionId: string;
-  customerId: string;
+  customerId: number;
   items: SaleItem[];
+  businessId: string;
   subtotalAmount: number;
   taxAmount: number;
   discountAmount: number;

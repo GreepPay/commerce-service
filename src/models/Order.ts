@@ -1,9 +1,11 @@
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from "typeorm";
-import { BaseModel } from "./BaseModel";
+import { BaseModel, getEnumType, getJsonType } from "./BaseModel";
 import { Customer } from "./Customer";
+import type { Customer as Customertype } from "./Customer";
 import { Product } from "./Product";
 import { Delivery } from "./Delivery";
-import { Sale } from "./Sale";
+import type { Delivery as Deliverytype } from "./Delivery";
+import type { Sale } from "./Sale";
 
 export enum OrderStatus {
   PENDING = "pending",
@@ -26,18 +28,18 @@ export enum PaymentStatus {
 
 @Entity()
 export class Order extends BaseModel {
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   orderNumber!: string;
 
-  @ManyToOne(() => Customer)
-  @JoinColumn()
-  customer!: typeof Customer;
+  @Column()
+  customerId!: number;
 
-  @ManyToOne(() => Sale)
-  @JoinColumn()
-  sale!: typeof Sale;
+  @OneToMany("Sale", "order", {
+    cascade: false,
+  })
+  sales!: Sale[];
 
-  @Column("jsonb")
+  @Column({ type: getJsonType() })
   items!: Array<{
     product: Product;
     quantity: number;
@@ -48,45 +50,45 @@ export class Order extends BaseModel {
     total: number;
   }>;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   subtotalAmount!: number;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   taxAmount!: number;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   discountAmount!: number;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   totalAmount!: number;
 
-  @Column({ default: "NGN" })
+  @Column({ type: "varchar", length: 3, default: "NGN" })
   currency!: string;
 
   @Column({
-    type: "enum",
+    type: getEnumType(),
     enum: OrderStatus,
     default: OrderStatus.PENDING,
   })
   status!: OrderStatus;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   shippingAddress?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   billingAddress?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", length: 50, nullable: true })
   paymentMethod?: string;
 
   @Column({
-    type: "enum",
+    type: getEnumType(),
     enum: PaymentStatus,
     default: PaymentStatus.PENDING,
   })
   paymentStatus!: PaymentStatus;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   paymentDetails?: {
     transactionId: string;
     provider: string;
@@ -97,7 +99,7 @@ export class Order extends BaseModel {
     timestamp: Date;
   };
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   appliedDiscounts?: Array<{
     code: string;
     type: "percentage" | "fixed_amount";
@@ -105,7 +107,7 @@ export class Order extends BaseModel {
     description: string;
   }>;
 
-  @Column("jsonb", { nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   taxDetails?: Array<{
     type: string;
     rate: number;
@@ -113,7 +115,7 @@ export class Order extends BaseModel {
     description: string;
   }>;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: getJsonType(), nullable: true })
   refundDetails?: {
     transactionId: string;
     amount: number;
@@ -123,9 +125,9 @@ export class Order extends BaseModel {
   };
 
   @OneToMany(() => Delivery, (delivery) => delivery.order)
-  deliveries!: Delivery[];
+  deliveries!: Deliverytype[];
 
-  @Column({ type: "jsonb" })
+  @Column({ type: getJsonType() })
   statusHistory!: Array<{
     status: OrderStatus;
     timestamp: Date;

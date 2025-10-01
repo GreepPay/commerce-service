@@ -1,12 +1,11 @@
 import { OrderStatus, PaymentStatus } from "../models/Order";
 
 export interface Order {
-  id?: string;
-  customerId: string;
+  customerId: number;
   saleId?: string;
   items: OrderItem[];
-  shippingAddress: Address;
-  billingAddress: Address;
+  shippingAddress?: Address;
+  billingAddress?: Address;
   status?: OrderStatus;
   statusHistory?: StatusUpdate[];
   paymentMethod?: string;
@@ -34,6 +33,7 @@ export interface OrderItem {
   taxAmount?: number;
   discountAmount?: number;
   total?: number;
+  variantId?: string;
 }
 
 export interface StatusUpdate {
