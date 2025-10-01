@@ -6,6 +6,7 @@ export enum ProductType {
   PHYSICAL = "physical",
   DIGITAL = "digital",
   SUBSCRIPTION = "subscription",
+  EVENT = "event",
 }
 
 export enum ProductStatus {
