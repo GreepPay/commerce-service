@@ -1,4 +1,4 @@
-import { DeliveryPricingController } from "../controllers/DeliveryLocationController";
+import { DeliveryPricingController } from "../controllers/DeliveryPricingController";
 import router, { type BunRequest } from "./router";
 
 const APP_VERSION = "v1";
