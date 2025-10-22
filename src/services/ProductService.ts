@@ -1,5 +1,6 @@
 import { Product } from "../models/Product";
 import type { ICreateProduct } from "../forms/products";
+import { Category } from "../models/Category";
 
 export class ProductService {
   /**
@@ -74,6 +75,28 @@ export class ProductService {
         productData.eventDetails.eventDetails.waitlistEnabled || false;
     }
 
+    if (productData.categoryIds) {
+      const names = productData.categoryIds.map((name) => name.trim());
+      const existingCategories = await Category.find({
+        where: names.map((name) => ({ name })),
+      });
+
+      const existingNames = new Set(
+        existingCategories.map((category) => category.name)
+      );
+      const toCreate = names.filter((name) => !existingNames.has(name));
+
+      const createdCategories: Category[] = [];
+      for (const name of toCreate) {
+        const cat = Category.create();
+        cat.name = name;
+        await cat.save();
+        createdCategories.push(cat);
+      }
+
+      product.categories = [...existingCategories, ...createdCategories];
+    }
+
     await product.save();
 
     return product;
@@ -88,7 +111,7 @@ export class ProductService {
    */
   async updateProduct(
     id: number,
-    productData: Partial<ICreateProduct>,
+    productData: Partial<ICreateProduct>
   ): Promise<Product> {
     const product = await Product.findOne({
       where: { id },
@@ -167,6 +190,28 @@ export class ProductService {
       product.eventWaitlistEnabled =
         productData.eventDetails.eventDetails?.waitlistEnabled ??
         product.eventWaitlistEnabled;
+    }
+
+    if (productData.categoryIds) {
+      const names = productData.categoryIds.map((name) => name.trim());
+      const existingCategories = await Category.find({
+        where: names.map((name) => ({ name })),
+      });
+
+      const existingNames = new Set(
+        existingCategories.map((category) => category.name)
+      );
+      const toCreate = names.filter((name) => !existingNames.has(name));
+
+      const createdCategories: Category[] = [];
+      for (const name of toCreate) {
+        const cat = Category.create();
+        cat.name = name;
+        await cat.save();
+        createdCategories.push(cat);
+      }
+
+      product.categories = [...existingCategories, ...createdCategories];
     }
 
     await product.save();
