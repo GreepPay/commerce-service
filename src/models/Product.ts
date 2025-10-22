@@ -1,5 +1,18 @@
-import { Entity, Column, ManyToMany, JoinTable, OneToMany } from "typeorm";
-import { BaseModel, getDateTimeType, getEnumType, getJsonType } from "./BaseModel";
+import {
+  Entity,
+  Column,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
+import {
+  BaseModel,
+  getDateTimeType,
+  getEnumType,
+  getJsonType,
+} from "./BaseModel";
 import { Category } from "./Category";
 import type { Category as Categorytype } from "./Category";
 import type { ProductVariant } from "../forms/products";
@@ -65,7 +78,10 @@ export class Product extends BaseModel {
   })
   status!: ProductStatus;
 
-  @Column({ type: getJsonType(), default: process.env.APP_STATE === "test" ? "[]" : () => "'[]'", })
+  @Column({
+    type: getJsonType(),
+    default: process.env.APP_STATE === "test" ? "[]" : () => "'[]'",
+  })
   variants!: ProductVariant[];
 
   // Inventory Management
@@ -141,10 +157,13 @@ export class Product extends BaseModel {
   @Column({ type: "boolean", default: false })
   eventWaitlistEnabled!: boolean;
 
+  @Column({ type: "int", nullable: true })
+  categoryId?: number;
+
   // Relationships
-  @ManyToMany(() => Category)
-  @JoinTable()
-  categories!: Categorytype[];
+  @ManyToOne(() => Category, (category) => category.products)
+  @JoinColumn({ name: "categoryId" })
+  category!: Category;
 
   // SEO & Visibility
   @Column({ type: "varchar", length: 255, nullable: true })
@@ -157,7 +176,10 @@ export class Product extends BaseModel {
   isVisible!: boolean;
 
   // Media
-  @Column({ type: getJsonType(), default: process.env.APP_STATE === "test" ? "[]" : () => "'[]'",})
+  @Column({
+    type: getJsonType(),
+    default: process.env.APP_STATE === "test" ? "[]" : () => "'[]'",
+  })
   images!: Array<{
     url: string;
     altText: string;
