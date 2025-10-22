@@ -75,33 +75,26 @@ export class ProductService {
         productData.eventDetails.eventDetails.waitlistEnabled || false;
     }
 
-    if (productData.categoryIds) {
-      const names = productData.categoryIds.map((name) => name.trim());
-      const existingCategories = await Category.find({
-        where: names.map((name) => ({ name })),
-      });
+    if (productData.categoryIds && productData.categoryIds.length > 0) {
+      const name = productData.categoryIds[0].trim();
 
-      const existingNames = new Set(
-        existingCategories.map((category) => category.name)
-      );
-      const toCreate = names.filter((name) => !existingNames.has(name));
+      let category = await Category.findOne({ where: { name } });
 
-      const createdCategories: Category[] = [];
-      for (const name of toCreate) {
-        const cat = Category.create();
-        cat.name = name;
-        cat.slug =
+      if (!category) {
+        category = Category.create();
+        category.name = name;
+        category.slug =
           name
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "") +
           "-" +
           Math.random().toString(36).substring(2, 9);
-        await cat.save();
-        createdCategories.push(cat);
+        await category.save();
       }
 
-      product.categories = [...existingCategories, ...createdCategories];
+      // assign the found/created category id to the product
+      product.categoryId = category.id;
     }
 
     await product.save();
@@ -199,33 +192,26 @@ export class ProductService {
         product.eventWaitlistEnabled;
     }
 
-    if (productData.categoryIds) {
-      const names = productData.categoryIds.map((name) => name.trim());
-      const existingCategories = await Category.find({
-        where: names.map((name) => ({ name })),
-      });
+    if (productData.categoryIds && productData.categoryIds.length > 0) {
+      const name = productData.categoryIds[0].trim();
 
-      const existingNames = new Set(
-        existingCategories.map((category) => category.name)
-      );
-      const toCreate = names.filter((name) => !existingNames.has(name));
+      let category = await Category.findOne({ where: { name } });
 
-      const createdCategories: Category[] = [];
-      for (const name of toCreate) {
-        const cat = Category.create();
-        cat.name = name;
-        cat.slug =
+      if (!category) {
+        category = Category.create();
+        category.name = name;
+        category.slug =
           name
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "") +
           "-" +
           Math.random().toString(36).substring(2, 9);
-        await cat.save();
-        createdCategories.push(cat);
+        await category.save();
       }
 
-      product.categories = [...existingCategories, ...createdCategories];
+      // assign the found/created category id to the product
+      product.categoryId = category.id;
     }
 
     await product.save();
