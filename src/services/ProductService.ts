@@ -192,12 +192,12 @@ export class ProductService {
         product.eventWaitlistEnabled;
     }
 
-    console.log("categoryIds", productData.categoryIds);
-
     if (productData.categoryIds && productData.categoryIds.length > 0) {
       const name = productData.categoryIds[0].trim();
 
       let category = await Category.findOne({ where: { name } });
+
+      console.log(category);
 
       if (!category) {
         category = Category.create();
