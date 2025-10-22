@@ -90,6 +90,13 @@ export class ProductService {
       for (const name of toCreate) {
         const cat = Category.create();
         cat.name = name;
+        cat.slug =
+          name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "") +
+          "-" +
+          Math.random().toString(36).substring(2, 9);
         await cat.save();
         createdCategories.push(cat);
       }
@@ -207,6 +214,13 @@ export class ProductService {
       for (const name of toCreate) {
         const cat = Category.create();
         cat.name = name;
+        cat.slug =
+          name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "") +
+          "-" +
+          Math.random().toString(36).substring(2, 9);
         await cat.save();
         createdCategories.push(cat);
       }
