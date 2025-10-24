@@ -163,7 +163,7 @@ export class Product extends BaseModel {
   // Relationships
   @ManyToOne(() => Category, (category) => category.products)
   @JoinColumn({ name: "categoryId" })
-  category!: Category;
+  category!: Categorytype;
 
   // SEO & Visibility
   @Column({ type: "varchar", length: 255, nullable: true })
