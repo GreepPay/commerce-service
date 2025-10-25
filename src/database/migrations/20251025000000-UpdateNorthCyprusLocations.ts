@@ -1,6 +1,8 @@
 import type { MigrationInterface, QueryRunner } from "typeorm";
 
-export class UpdateNorthCyprusLocations1729880400000 implements MigrationInterface {
+export class UpdateNorthCyprusLocations20251025000000
+  implements MigrationInterface
+{
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Delete existing delivery pricing first (due to foreign key constraints)
     await queryRunner.query(
