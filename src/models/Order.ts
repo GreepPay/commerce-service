@@ -56,9 +56,6 @@ export class Order extends BaseModel {
   @Column({ type: "decimal", precision: 10, scale: 2 })
   taxAmount!: number;
 
-  @Column({ type: "int", precision: 10, scale: 2 })
-  saleId!: number;
-
   @Column({ type: "decimal", precision: 10, scale: 2 })
   discountAmount!: number;
 
