@@ -1,6 +1,8 @@
 import type { MigrationInterface, QueryRunner } from "typeorm";
 
-export class PopulateOrderIdFromMetadata20251029000000 implements MigrationInterface {
+export class PopulateOrderIdFromMetadata20251029000000
+  implements MigrationInterface
+{
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Update orderId from metadata.orderId where orderId is null
     await queryRunner.query(`
