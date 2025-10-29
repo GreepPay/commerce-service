@@ -112,6 +112,7 @@ export class OrderService {
 
         // Optional: attach orderId back to each sale
         for (const sale of sales) {
+          sale.orderId = savedOrder.id;
           sale.metadata = {
             ...(sale.metadata || {}),
             orderId: savedOrder.id,
