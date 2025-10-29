@@ -1,5 +1,6 @@
 import { Product } from "../models/Product";
 import type { ICreateProduct } from "../forms/products";
+import { Category } from "../models/Category";
 
 export class ProductService {
   /**
@@ -74,6 +75,28 @@ export class ProductService {
         productData.eventDetails.eventDetails.waitlistEnabled || false;
     }
 
+    if (productData.categoryIds && productData.categoryIds.length > 0) {
+      const name = productData.categoryIds[0].trim();
+
+      let category = await Category.findOne({ where: { name } });
+
+      if (!category) {
+        category = Category.create();
+        category.name = name;
+        category.slug =
+          name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "") +
+          "-" +
+          Math.random().toString(36).substring(2, 9);
+        await category.save();
+      }
+
+      // assign the found/created category id to the product
+      product.categoryId = category.id;
+    }
+
     await product.save();
 
     return product;
@@ -88,7 +111,7 @@ export class ProductService {
    */
   async updateProduct(
     id: number,
-    productData: Partial<ICreateProduct>,
+    productData: Partial<ICreateProduct>
   ): Promise<Product> {
     const product = await Product.findOne({
       where: { id },
@@ -167,6 +190,30 @@ export class ProductService {
       product.eventWaitlistEnabled =
         productData.eventDetails.eventDetails?.waitlistEnabled ??
         product.eventWaitlistEnabled;
+    }
+
+    if (productData.categoryIds && productData.categoryIds.length > 0) {
+      const name = productData.categoryIds[0].trim();
+
+      let category = await Category.findOne({ where: { name } });
+
+      console.log(category);
+
+      if (!category) {
+        category = Category.create();
+        category.name = name;
+        category.slug =
+          name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "") +
+          "-" +
+          Math.random().toString(36).substring(2, 9);
+        await category.save();
+      }
+
+      // assign the found/created category id to the product
+      product.categoryId = category.id;
     }
 
     await product.save();
