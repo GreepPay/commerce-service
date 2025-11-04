@@ -25,6 +25,9 @@ export class DeliveryPricing {
   @Column({ type: "decimal", precision: 10, scale: 2 })
   price!: number;
 
+  @Column({ type: "varchar", length: 3, default: "TRY" })
+  currency!: string;
+
   @Column({ type: "varchar", length: 20, default: "active" })
   status!: string;
 
