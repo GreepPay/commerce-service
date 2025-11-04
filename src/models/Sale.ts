@@ -104,6 +104,9 @@ export class Sale extends BaseModel {
   @Column({ type: getJsonType(), nullable: true })
   metadata?: Record<string, any>;
 
+  @Column({ type: "int", nullable: true })
+  orderId?: number;
+
   @ManyToOne("Order", "sales", {
     nullable: true,
     onDelete: "SET NULL",
