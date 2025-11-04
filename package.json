@@ -9,9 +9,10 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^22.13.0",
+    "@types/node": "^22.18.8",
     "@types/swagger-jsdoc": "^6.0.4",
-    "typescript": "^5.7.3"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -27,7 +28,6 @@
     "sqlite3": "^5.1.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-dist": "^5.18.2",
-    "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.19.2",
     "typeorm": "0.3.14",
