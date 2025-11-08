@@ -10,6 +10,7 @@ export enum DeliveryStatus {
   SHIPPED = "shipped",
   IN_TRANSIT = "in_transit",
   OUT_FOR_DELIVERY = "out_for_delivery",
+  ONGOING = "ongoing",
 
   // Final states
   DELIVERED = "delivered",

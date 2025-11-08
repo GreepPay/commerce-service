@@ -90,7 +90,7 @@ export class DeliveryService {
 
     // Update businessId and status
     delivery.businessId = businessId;
-    delivery.status = DeliveryStatus.CONFIRMED;
+    delivery.status = DeliveryStatus.ONGOING;
 
     // Add tracking update
     delivery.trackingUpdates = Array.isArray(delivery.trackingUpdates)
@@ -99,7 +99,7 @@ export class DeliveryService {
 
     delivery.trackingUpdates.push({
       timestamp: new Date(),
-      status: DeliveryStatus.CONFIRMED,
+      status: DeliveryStatus.ONGOING,
       location: delivery.pickupAddress || "Business Location",
     });
 
