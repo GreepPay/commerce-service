@@ -117,6 +117,8 @@ export class ProductService {
       where: { id },
     });
 
+    console.log("Updating product:", productData);
+
     if (!product) {
       throw {
         status: 404,
@@ -126,6 +128,7 @@ export class ProductService {
 
     product.businessId = productData.businessId ?? product.businessId;
     product.sku = productData.sku ?? product.sku;
+    product.status = productData.status ?? product.status;
     product.name = productData.name ?? product.name;
     product.description = productData.description ?? product.description;
     product.price = productData.price ?? product.price;
