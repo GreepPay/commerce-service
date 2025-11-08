@@ -126,36 +126,53 @@ export class ProductService {
       };
     }
 
-    product.businessId = productData.businessId ?? product.businessId;
-    product.sku = productData.sku ?? product.sku;
-    product.status = productData.status ?? product.status;
-    product.type = productData.type ?? product.type;
-    product.name = productData.name ?? product.name;
-    product.description = productData.description ?? product.description;
-    product.price = productData.price ?? product.price;
-    product.currency = productData.currency ?? product.currency;
-    product.type = productData.type ?? product.type;
-    product.variants = productData.variants ?? product.variants;
-    product.inventoryCount =
-      productData.inventoryCount ?? product.inventoryCount;
-    product.stockThreshold =
-      productData.stockThreshold ?? product.stockThreshold;
-    product.isBackorderAllowed =
-      productData.isBackorderAllowed ?? product.isBackorderAllowed;
-    product.images = productData.images ?? product.images;
+    product.businessId = productData.businessId
+      ? productData.businessId
+      : product.businessId;
+    product.sku = productData.sku ? productData.sku : product.sku;
+    product.status = productData.status ? productData.status : product.status;
+    product.type = productData.type ? productData.type : product.type;
+    product.name = productData.name ? productData.name : product.name;
+    product.description = productData.description
+      ? productData.description
+      : product.description;
+    product.price = productData.price ? productData.price : product.price;
+    product.currency = productData.currency
+      ? productData.currency
+      : product.currency;
+    product.type = productData.type ? productData.type : product.type;
+    product.variants = productData.variants?.length
+      ? productData.variants
+      : product.variants;
+    product.inventoryCount = productData.inventoryCount
+      ? productData.inventoryCount
+      : product.inventoryCount;
+    product.stockThreshold = productData.stockThreshold
+      ? productData.stockThreshold
+      : product.stockThreshold;
+    product.isBackorderAllowed = productData.isBackorderAllowed
+      ? productData.isBackorderAllowed
+      : product.isBackorderAllowed;
+    product.images = productData.images?.length
+      ? productData.images
+      : product.images;
 
     if (productData.digitalDetails) {
-      product.downloadUrl =
-        productData.digitalDetails.download?.url ?? product.downloadUrl;
-      product.downloadLimit =
-        productData.digitalDetails.download?.downloadLimit ??
-        product.downloadLimit;
+      product.downloadUrl = productData.digitalDetails.download?.url
+        ? productData.digitalDetails.download?.url
+        : product.downloadUrl;
+      product.downloadLimit = productData.digitalDetails.download?.downloadLimit
+        ? productData.digitalDetails.download?.downloadLimit
+        : product.downloadLimit;
     }
 
     if (productData.physicalDetails) {
-      product.weight = productData.physicalDetails.weight ?? product.weight;
-      product.dimensions =
-        productData.physicalDetails.dimensions ?? product.dimensions;
+      product.weight = productData.physicalDetails.weight
+        ? productData.physicalDetails.weight
+        : product.weight;
+      product.dimensions = productData.physicalDetails.dimensions
+        ? productData.physicalDetails.dimensions
+        : product.dimensions;
     }
 
     if (productData.subscriptionDetails) {
@@ -164,44 +181,49 @@ export class ProductService {
           | "monthly"
           | "yearly") ??
         (product.billingInterval || "monthly");
-      product.trialPeriodDays =
-        productData.subscriptionDetails.billing?.trialDays ??
-        product.trialPeriodDays;
+      product.trialPeriodDays = productData.subscriptionDetails.billing
+        ?.trialDays
+        ? productData.subscriptionDetails.billing?.trialDays
+        : product.trialPeriodDays;
     }
 
     if (productData.eventDetails) {
-      product.eventType =
-        productData.eventDetails.eventType ?? product.eventType;
-      product.eventStartDate =
-        productData.eventDetails.eventDetails?.startDate ??
-        product.eventStartDate;
-      product.eventEndDate =
-        productData.eventDetails.eventDetails?.endDate ?? product.eventEndDate;
-      product.venueName =
-        productData.eventDetails.eventDetails?.venueName ?? product.venueName;
-      product.eventOnlineUrl =
-        productData.eventDetails.eventDetails?.onlineUrl ??
-        product.eventOnlineUrl;
-      product.eventLocation =
-        productData.eventDetails.eventDetails?.location ??
-        product.eventLocation;
-      product.eventCapacity =
-        productData.eventDetails.eventDetails?.capacity ??
-        product.eventCapacity;
-      product.eventRegisteredCount =
-        productData.eventDetails.eventDetails?.registeredCount ??
-        product.eventRegisteredCount;
-      product.eventWaitlistEnabled =
-        productData.eventDetails.eventDetails?.waitlistEnabled ??
-        product.eventWaitlistEnabled;
+      product.eventType = productData.eventDetails.eventType
+        ? productData.eventDetails.eventType
+        : product.eventType;
+      product.eventStartDate = productData.eventDetails.eventDetails?.startDate
+        ? productData.eventDetails.eventDetails?.startDate
+        : product.eventStartDate;
+      product.eventEndDate = productData.eventDetails.eventDetails?.endDate
+        ? productData.eventDetails.eventDetails?.endDate
+        : product.eventEndDate;
+      product.venueName = productData.eventDetails.eventDetails?.venueName
+        ? productData.eventDetails.eventDetails?.venueName
+        : product.venueName;
+      product.eventOnlineUrl = productData.eventDetails.eventDetails?.onlineUrl
+        ? productData.eventDetails.eventDetails?.onlineUrl
+        : product.eventOnlineUrl;
+      product.eventLocation = productData.eventDetails.eventDetails?.location
+        ? productData.eventDetails.eventDetails?.location
+        : product.eventLocation;
+      product.eventCapacity = productData.eventDetails.eventDetails?.capacity
+        ? productData.eventDetails.eventDetails?.capacity
+        : product.eventCapacity;
+      product.eventCapacity;
+      product.eventRegisteredCount = productData.eventDetails.eventDetails
+        ?.registeredCount
+        ? productData.eventDetails.eventDetails?.registeredCount
+        : product.eventRegisteredCount;
+      product.eventWaitlistEnabled = productData.eventDetails.eventDetails
+        ?.waitlistEnabled
+        ? productData.eventDetails.eventDetails?.waitlistEnabled
+        : product.eventWaitlistEnabled;
     }
 
     if (productData.categoryIds && productData.categoryIds.length > 0) {
       const name = productData.categoryIds[0].trim();
 
       let category = await Category.findOne({ where: { name } });
-
-      console.log(category);
 
       if (!category) {
         category = Category.create();
