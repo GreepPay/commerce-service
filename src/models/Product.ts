@@ -186,6 +186,21 @@ export class Product extends BaseModel {
     isPrimary: boolean;
   }>;
 
+  // Tags for categorization and filtering
+  @Column({
+    type: getJsonType(),
+    nullable: true,
+    default: process.env.APP_STATE === "test" ? "[]" : () => "'[]'",
+  })
+  tags?: string[];
+
+  // National Cuisine Fields
+  @Column({ type: "varchar", length: 255, nullable: true })
+  national_cuisine?: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  national_cuisine_country?: string;
+
   // Product Relationships
   @ManyToMany(() => Product)
   @JoinTable()

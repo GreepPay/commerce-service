@@ -99,6 +99,7 @@ export class OrderService {
           billingAddress: orderData.billingAddress || undefined,
           paymentMethod: firstSale.paymentDetails.method,
           paymentStatus: PaymentStatus.PENDING,
+          isPreorder: orderData.isPreorder || false,
           statusHistory: [
             {
               status: OrderStatus.PENDING,

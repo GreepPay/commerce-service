@@ -21,6 +21,7 @@ export interface Order {
   currency?: string;
   appliedDiscounts?: AppliedDiscount[];
   taxDetails?: TaxDetail[];
+  isPreorder?: boolean;
 }
 
 export interface OrderItem {

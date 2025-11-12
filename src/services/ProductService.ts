@@ -156,6 +156,13 @@ export class ProductService {
     product.images = productData.images?.length
       ? productData.images
       : product.images;
+    product.tags = productData.tags?.length ? productData.tags : product.tags;
+    product.national_cuisine = productData.national_cuisine
+      ? productData.national_cuisine
+      : product.national_cuisine;
+    product.national_cuisine_country = productData.national_cuisine_country
+      ? productData.national_cuisine_country
+      : product.national_cuisine_country;
 
     if (productData.digitalDetails) {
       product.downloadUrl = productData.digitalDetails.download?.url

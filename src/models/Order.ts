@@ -88,6 +88,9 @@ export class Order extends BaseModel {
   })
   paymentStatus!: PaymentStatus;
 
+  @Column({ type: "boolean", default: false })
+  isPreorder!: boolean;
+
   @Column({ type: getJsonType(), nullable: true })
   paymentDetails?: {
     transactionId: string;
