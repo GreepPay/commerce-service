@@ -20,7 +20,7 @@ export interface BaseProduct {
   inventoryCount?: number;
   stockThreshold?: number;
   isBackorderAllowed?: boolean;
-  national_cuisine?: string;
+  national_cuisine?: boolean;
   national_cuisine_country?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -50,7 +50,7 @@ export interface ICreateProduct {
   digitalDetails?: DigitalProduct;
   subscriptionDetails?: SubscriptionProduct;
   eventDetails?: EventProduct;
-  national_cuisine?: string;
+  national_cuisine?: boolean;
   national_cuisine_country?: string;
 }
 

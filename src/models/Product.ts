@@ -196,7 +196,7 @@ export class Product extends BaseModel {
 
   // National Cuisine Fields
   @Column({ type: "varchar", length: 255, nullable: true })
-  national_cuisine?: string;
+  national_cuisine?: boolean;
 
   @Column({ type: "varchar", length: 255, nullable: true })
   national_cuisine_country?: string;

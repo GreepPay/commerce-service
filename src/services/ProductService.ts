@@ -35,6 +35,10 @@ export class ProductService {
     product.stockThreshold = productData.stockThreshold || 0;
     product.isBackorderAllowed = productData.isBackorderAllowed || false;
     product.images = productData.images || [];
+    product.tags = productData.tags || [];
+    product.national_cuisine = productData.national_cuisine || false;
+    product.national_cuisine_country =
+      productData.national_cuisine_country || "";
 
     // Digital products
     if (productData.digitalDetails) {
