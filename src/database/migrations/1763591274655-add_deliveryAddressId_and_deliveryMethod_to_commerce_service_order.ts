@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import type { MigrationInterface, QueryRunner } from "typeorm";
 
 export class AddDeliveryAddressIdAndDeliveryMethodToCommerceServiceOrderBase1763591274655
   implements MigrationInterface
