@@ -13,6 +13,8 @@ export interface Order {
   paymentDetails?: PaymentDetails;
   refundDetails?: RefundDetails;
   cancellationReason?: string;
+  deliveryAddressId?: number;
+  deliveryMethod?: string;
   refundId?: string;
   subtotalAmount?: number;
   taxAmount?: number;

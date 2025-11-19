@@ -97,6 +97,8 @@ export class OrderService {
           status: OrderStatus.PENDING,
           shippingAddress: orderData.shippingAddress || undefined,
           billingAddress: orderData.billingAddress || undefined,
+          deliveryAddressId: orderData.deliveryAddressId || undefined,
+          deliveryMethod: orderData.deliveryMethod || undefined,
           paymentMethod: firstSale.paymentDetails.method,
           paymentStatus: PaymentStatus.PENDING,
           isPreorder: orderData.isPreorder || false,
@@ -137,24 +139,24 @@ export class OrderService {
         let savedDelivery = null;
 
         // ✅ Only create delivery for non-event orders
-        if (!isAllEventProducts) {
-          const delivery = Delivery.create({
-            order: savedOrder,
-            status: DeliveryStatus.PENDING,
-            estimatedDeliveryDate: new Date(Date.now() + 7 * 86400000),
-            deliveryAddress: JSON.stringify(orderData.shippingAddress || {}),
-            trackingNumber: `TRK-${Date.now()}`,
-            trackingUpdates: [
-              {
-                timestamp: new Date(),
-                status: DeliveryStatus.PENDING,
-                location: "Processing Center",
-              },
-            ],
-          });
+        // if (!isAllEventProducts) {
+        //   const delivery = Delivery.create({
+        //     order: savedOrder,
+        //     status: DeliveryStatus.PENDING,
+        //     estimatedDeliveryDate: new Date(Date.now() + 7 * 86400000),
+        //     deliveryAddress: JSON.stringify(orderData.shippingAddress || {}),
+        //     trackingNumber: `TRK-${Date.now()}`,
+        //     trackingUpdates: [
+        //       {
+        //         timestamp: new Date(),
+        //         status: DeliveryStatus.PENDING,
+        //         location: "Processing Center",
+        //       },
+        //     ],
+        //   });
 
-          savedDelivery = await manager.save(delivery);
-        }
+        //   savedDelivery = await manager.save(delivery);
+        // }
 
         const tickets: any[] = [];
         if (eventProducts.length > 0) {
@@ -172,12 +174,20 @@ export class OrderService {
           }
         }
 
-        return {
+        const result: any = {
           order: savedOrder,
           sale: sales,
-          ...(savedDelivery && { delivery: savedDelivery }),
-          ...(tickets.length > 0 && { tickets }),
         };
+
+        if (savedDelivery) {
+          result.delivery = savedDelivery;
+        }
+
+        if (tickets.length > 0) {
+          result.tickets = tickets;
+        }
+
+        return result;
       }
     );
   }

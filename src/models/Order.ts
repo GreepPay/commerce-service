@@ -75,6 +75,12 @@ export class Order extends BaseModel {
   @Column({ type: "varchar", length: 255, nullable: true })
   shippingAddress?: string;
 
+  @Column({ type: "int", nullable: true })
+  deliveryAddressId?: number;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  deliveryMethod?: string;
+
   @Column({ type: "varchar", length: 255, nullable: true })
   billingAddress?: string;
 
