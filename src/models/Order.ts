@@ -87,6 +87,9 @@ export class Order extends BaseModel {
   @Column({ type: "varchar", length: 50, nullable: true })
   paymentMethod?: string;
 
+  @Column({ type: "varchar", length: 255, nullable: true })
+  conversationUuid?: string;
+
   @Column({
     type: getEnumType(),
     enum: PaymentStatus,

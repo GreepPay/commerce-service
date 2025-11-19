@@ -15,6 +15,7 @@ export interface Order {
   cancellationReason?: string;
   deliveryAddressId?: number;
   deliveryMethod?: string;
+  conversationUuid?: string;
   refundId?: string;
   subtotalAmount?: number;
   taxAmount?: number;

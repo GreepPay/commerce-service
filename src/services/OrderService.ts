@@ -99,6 +99,7 @@ export class OrderService {
           billingAddress: orderData.billingAddress || undefined,
           deliveryAddressId: orderData.deliveryAddressId || undefined,
           deliveryMethod: orderData.deliveryMethod || undefined,
+          conversationUuid: orderData.conversationUuid || undefined,
           paymentMethod: firstSale.paymentDetails.method,
           paymentStatus: PaymentStatus.PENDING,
           isPreorder: orderData.isPreorder || false,
