@@ -76,10 +76,10 @@ export class Order extends BaseModel {
   shippingAddress?: string;
 
   @Column({ type: "int", nullable: true })
-  deliveryAddressId?: number;
+  deliveryaddressid?: number;
 
   @Column({ type: "varchar", length: 255, nullable: true })
-  deliveryMethod?: string;
+  deliverymethod?: string;
 
   @Column({ type: "varchar", length: 255, nullable: true })
   billingAddress?: string;
@@ -88,7 +88,7 @@ export class Order extends BaseModel {
   paymentMethod?: string;
 
   @Column({ type: "varchar", length: 255, nullable: true })
-  conversationUuid?: string;
+  conversationuuid?: string;
 
   @Column({
     type: getEnumType(),
