@@ -21,7 +21,7 @@ export class Delivery extends BaseModel {
   @Column({ type: getDateTimeType(), nullable: true })
   actualDeliveryDate?: Date;
 
-  @Column({ type: "text", length: 255 })
+  @Column({ type: "text" })
   deliveryAddress!: string;
 
   @Column({ type: getJsonType(), nullable: true })
@@ -41,7 +41,7 @@ export class Delivery extends BaseModel {
     notes?: string;
   }>;
 
-  @Column({ type: "text", length: 255, nullable: true })
+  @Column({ type: "text", nullable: true })
   pickupAddress?: string;
 
   @Column({ type: "varchar", length: 20, nullable: true })
